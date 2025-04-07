@@ -25,6 +25,7 @@ export type UiState = {
 export type BlockArgs = {
   countsRef?: PlRef;
   clusterAnnotationRef?: PlRef;
+  title?: string;
 };
 
 export const model = BlockModel.create()
@@ -55,7 +56,6 @@ export const model = BlockModel.create()
   })
 
   .output('countsOptions', (ctx) =>
-    // I've added these "||" for backward compatibility (As I see, the shape of PColum was changed)
     ctx.resultPool.getOptions((spec) => isPColumnSpec(spec)
       && spec.name === 'pl7.app/rna-seq/countMatrix' && spec.domain?.['pl7.app/rna-seq/normalized'] === 'false'
     , { includeNativeLabel: true, addLabelAsSuffix: true }),
@@ -68,18 +68,10 @@ export const model = BlockModel.create()
   )
 
   .output('clusterMarkersPt', (ctx) => {
-    // let pCols = ctx.outputs?.resolve('clusterMarkersPf')?.getPColumns();
     const pCols = ctx.outputs?.resolve('clusterMarkersPf')?.getPColumns();
     if (pCols === undefined) {
       return undefined;
     }
-
-    // Filter by selected comparison
-    // pCols = pCols.filter(
-    //   (col) => col.spec.axesSpec[0]?.domain?.['pl7.app/comparison'] === ctx.uiState.comparison,
-    // );
-
-    // return createPlDataTable(ctx, pCols, ctx.uiState?.tableState);
 
     const anchor = pCols[0];
     if (!anchor) return undefined;
@@ -92,13 +84,6 @@ export const model = BlockModel.create()
       sheets: r.map((values, i) => createPlDataTableSheet(ctx, anchor.spec.axesSpec[i], values)),
     };
   })
-
-// .output('clusterMarkersPf', (ctx): PFrameHandle | undefined => {
-//   const pCols = ctx.outputs?.resolve('clusterMarkersPf')?.getPColumns();
-//   if (pCols === undefined) {
-//     return undefined;
-//   }
-// })
 
   .output('clusterMarkersTop3Pf', (ctx): PFrameHandle | undefined => {
     const pCols = ctx.outputs?.resolve('clusterMarkersTop3Pf')?.getPColumns();
@@ -118,43 +103,19 @@ export const model = BlockModel.create()
     );
   })
 
-// .output('UMAPPf', (ctx): PFrameHandle | undefined => {
-//   const pCols = ctx.outputs?.resolve('UMAPPf')?.getPColumns();
-//   if (pCols === undefined) {
-//     return undefined;
-//   }
-
-//   // enriching with upstream data
-//   const upstream = ctx.resultPool
-//     .getData()
-//     .entries.map((v) => v.obj)
-//     .filter(isPColumn)
-//     .filter((column) => column.id.includes('metadata'));
-
-//   return ctx.createPFrame([...pCols, ...upstream]);
-// })
-
-// .output('tSNEPf', (ctx): PFrameHandle | undefined => {
-//   const pCols = ctx.outputs?.resolve('tSNEPf')?.getPColumns();
-//   if (pCols === undefined) {
-//     return undefined;
-//   }
-
-//   // enriching with upstream data
-//   const upstream = ctx.resultPool
-//     .getData()
-//     .entries.map((v) => v.obj)
-//     .filter(isPColumn)
-//     .filter((column) => column.id.includes('metadata'));
-
-//   return ctx.createPFrame([...pCols, ...upstream]);
-// })
+  .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
   .sections((_ctx) => ([
     { type: 'link', href: '/', label: 'Main' },
     { type: 'link', href: '/umap', label: 'UMAP' },
     { type: 'link', href: '/dotplot', label: 'Dotplot' },
   ]))
+
+  .title((ctx) =>
+    ctx.args.title
+      ? `Cluster Markers - ${ctx.args.title}`
+      : 'Cluster Markers',
+  )
 
   .done();
 

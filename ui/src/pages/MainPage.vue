@@ -3,28 +3,31 @@ import '@milaboratories/graph-maker/styles';
 import { PlAgDataTable, PlAgDataTableToolsPanel, PlBlockPage, PlBtnGhost, PlDropdownRef, PlMaskIcon24, PlSlideModal } from '@platforma-sdk/ui-vue';
 import type { PlDataTableSettings } from '@platforma-sdk/ui-vue';
 import { useApp } from '../app';
-import { computed, ref } from 'vue';
+import { computed, reactive } from 'vue';
+import type { PlRef } from '@platforma-sdk/model';
+import { plRefsEqual } from '@platforma-sdk/model';
 
 const app = useApp();
 
 const tableSettings = computed<PlDataTableSettings>(() => ({
   sourceType: 'ptable',
   pTable: app.model.outputs.clusterMarkersPt?.table,
-  sheets: app.model.outputs.clusterMarkersPt?.sheets,
+  // sheets: app.model.outputs.clusterMarkersPt?.sheets,
 }));
 
-// const settingsAreShown = ref(app.model.outputs.UMAPPf === undefined)
-const settingsAreShown = ref(true);
-const showSettings = () => {
-  settingsAreShown.value = true;
-};
+const data = reactive<{
+  settingsOpen: boolean;
+}>({
+  settingsOpen: app.model.args.countsRef === undefined,
+});
 
-// const covariateOptions = computed(() => {
-//   return app.model.outputs.metadataOptions?.map((v) => ({
-//     value: v.ref,
-//     label: v.label,
-//   })) ?? [];
-// });
+function setInput(inputRef?: PlRef) {
+  app.model.args.countsRef = inputRef;
+  if (inputRef)
+    app.model.args.title = app.model.outputs.countsOptions?.find((o) => plRefsEqual(o.ref, inputRef))?.label;
+  else
+    app.model.args.title = undefined;
+}
 
 </script>
 
@@ -34,7 +37,7 @@ const showSettings = () => {
     <template #append>
       <!-- PlAgDataTableToolsPanel controls showing  Export column and filter-->
       <PlAgDataTableToolsPanel/>
-      <PlBtnGhost @click.stop="showSettings">
+      <PlBtnGhost @click.stop="() => data.settingsOpen = true">
         Settings
         <template #append>
           <PlMaskIcon24 name="settings" />
@@ -47,11 +50,12 @@ const showSettings = () => {
       show-columns-panel
       show-export-button
     />
-    <PlSlideModal v-model="settingsAreShown">
+    <PlSlideModal v-model="data.settingsOpen">
       <template #title>Settings</template>
       <PlDropdownRef
         v-model="app.model.args.countsRef" :options="app.model.outputs.countsOptions"
         label="Select dataset"
+        clearable @update:model-value="setInput"
       />
       <PlDropdownRef
         v-model="app.model.args.clusterAnnotationRef" :options="app.model.outputs.clusterAnnotationOptions"
