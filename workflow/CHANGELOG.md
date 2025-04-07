@@ -1,0 +1,12 @@
+# @platforma-open/milaboratories.cluster-markers.workflow
+
+## 1.1.0
+
+### Minor Changes
+
+- c25661f: First version
+
+### Patch Changes
+
+- Updated dependencies [c25661f]
+  - @platforma-open/milaboratories.cluster-markers.software@1.1.0
