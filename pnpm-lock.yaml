@@ -152,6 +152,9 @@ importers:
       '@platforma-open/milaboratories.cluster-markers.model':
         specifier: workspace:*
         version: link:../model
+      '@platforma-sdk/model':
+        specifier: 'catalog:'
+        version: 1.24.5
       '@platforma-sdk/ui-vue':
         specifier: 'catalog:'
         version: 1.24.5(typescript@5.5.4)
