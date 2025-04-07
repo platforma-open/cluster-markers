@@ -1,5 +1,15 @@
 # @platforma-open/milaboratories.cluster-markers
 
+## 1.1.1
+
+### Patch Changes
+
+- 09cb764: Improved visualization
+- Updated dependencies [09cb764]
+  - @platforma-open/milaboratories.cluster-markers.workflow@1.1.1
+  - @platforma-open/milaboratories.cluster-markers.model@1.1.1
+  - @platforma-open/milaboratories.cluster-markers.ui@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes
