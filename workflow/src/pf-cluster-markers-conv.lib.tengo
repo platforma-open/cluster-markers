@@ -1,0 +1,110 @@
+ll := import("@platforma-sdk/workflow-tengo:ll")
+
+getColumns := func(blockId, species) {
+  return {
+    "axes": [
+      {
+        "column": "Cluster",
+        "id": "cluster",
+        "allowNA": false,
+        "spec": {
+          "name": "pl7.app/rna-seq/cluster-num",
+          "type": "String",
+          "domain": {
+            "pl7.app/blockId": blockId
+          },
+          "annotations": {
+            "pl7.app/label": "Cluster"
+          }
+        }
+      },
+      {
+        "column": "Ensembl Id",
+        "spec": {
+						"name": "pl7.app/rna-seq/geneId",
+						"type": "String",
+						"domain": {
+							"pl7.app/species": species
+						},
+						"annotations": {
+							"pl7.app/label": "Ensembl Id",
+              "pl7.app/table/visibility": "optional"
+						}
+					}
+      }  
+      ],
+    "columns": [
+			// {
+			// 	"column": "Gene symbol",
+			// 	"id": "genesymbol",
+			// 	"allowNA": true,
+			// 	"spec": {
+			// 		"name": "pl7.app/rna-seq/genesymbol",
+			// 		"valueType": "String",
+			// 		"annotations": {
+			// 			"pl7.app/label": "Gene symbol",
+			// 			"pl7.app/table/orderPriority": "80"
+			// 		}
+			// 	}
+			// },
+			{
+				"column": "Log2FC",
+				"id": "log2foldchange",
+				"allowNA": true,
+				"spec": {
+					"name": "pl7.app/rna-seq/log2foldchange",
+					"valueType": "Double",
+					"annotations": {
+						"pl7.app/label": "Log2FC",
+						"pl7.app/table/orderPriority": "60"
+					}
+				}
+			},
+      {
+				"column": "Adjusted p-value",
+				"id": "padj",
+				"allowNA": true,
+				"spec": {
+					"name": "pl7.app/rna-seq/padj",
+					"valueType": "Double",
+					"annotations": {
+						"pl7.app/label": "Adjusted p-value",
+						"pl7.app/table/orderPriority": "20"
+					}
+				}
+			},
+      {
+				"column": "Percentage cells",
+				"id": "percentcells",
+				"allowNA": true,
+				"spec": {
+					"name": "pl7.app/rna-seq/percentcells",
+					"valueType": "Double",
+					"annotations": {
+						"pl7.app/label": "Cell percentage expressed",
+						"pl7.app/table/orderPriority": "10"
+					}
+				}
+			},
+		{
+				"column": "Mean expression",
+				"id": "meanexpression",
+				"allowNA": true,
+				"spec": {
+					"name": "pl7.app/rna-seq/meanexpression",
+					"valueType": "Double",
+					"annotations": {
+						"pl7.app/label": "Mean expression in cluster",
+						"pl7.app/table/orderPriority": "5"
+					}
+				}
+			}
+      ],
+    "storageFormat": "Binary",
+    "partitionKeyLength": 0
+  }
+}
+
+export ll.toStrict({
+	getColumns: getColumns
+})
