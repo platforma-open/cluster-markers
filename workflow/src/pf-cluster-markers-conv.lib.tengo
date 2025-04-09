@@ -101,7 +101,7 @@ getColumns := func(blockId, species) {
 			}
       ],
     "storageFormat": "Binary",
-    "partitionKeyLength": 0
+    "partitionKeyLength": 1
   }
 }
 
