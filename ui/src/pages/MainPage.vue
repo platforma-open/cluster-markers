@@ -12,7 +12,7 @@ const app = useApp();
 const tableSettings = computed<PlDataTableSettings>(() => ({
   sourceType: 'ptable',
   pTable: app.model.outputs.clusterMarkersPt?.table,
-  // sheets: app.model.outputs.clusterMarkersPt?.sheets,
+  sheets: app.model.outputs.clusterMarkersPt?.sheets,
 }));
 
 const data = reactive<{
