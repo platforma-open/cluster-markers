@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.ui
 
+## 1.2.0
+
+### Minor Changes
+
+- ef9b5a1: Fix sheets per cluster
+
 ## 1.1.1
 
 ### Patch Changes
