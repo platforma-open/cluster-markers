@@ -72,7 +72,7 @@ const defaultOptions: PredefinedGraphOption<'bubble'>[] = [
   <PlBlockPage>
     <GraphMaker
       v-model="app.model.ui.graphStateBubble" chartType="bubble"
-      :p-frame="app.model.outputs.clusterMarkersTop3Pf" :default-options="defaultOptions"
+      :p-frame="app.model.outputs.clusterMarkersTopPf" :default-options="defaultOptions"
     />
   </PlBlockPage>
 </template>

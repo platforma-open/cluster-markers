@@ -101,10 +101,10 @@ def find_markers(adata, cluster_column, strict_overlap):
 
     return markers_df
 
-def save_results(markers_df, cluster_column, output_all, output_top3):
+def save_results(markers_df, cluster_column, output_all, output_top, top_n):
     markers_df.to_csv(output_all, index=False)
-    top3_df = markers_df.groupby('Cluster', observed=False).head(3)
-    top3_df.to_csv(output_top3, index=False)
+    top_df = markers_df.groupby('Cluster', observed=False).head(top_n)
+    top_df.to_csv(output_top, index=False)
 
 def main():
     parser = argparse.ArgumentParser(description='Find cluster markers from single-cell RNA-seq data.')
@@ -112,7 +112,8 @@ def main():
     parser.add_argument('--clusters', required=True, help='CSV file with cluster assignments')
     parser.add_argument('--cluster_column', required=True, help='Column name for cluster resolution (e.g., "Cluster Resolution 0.4")')
     parser.add_argument('--output_all', default='cluster_markers.csv', help='Output file for all cluster markers')
-    parser.add_argument('--output_top3', default='top3_markers.csv', help='Output file for top 3 markers per cluster')
+    parser.add_argument('--output_top', default='top_markers.csv', help='Output file for top markers per cluster')
+    parser.add_argument('--top_n', type=int, default=3, help='Number of top markers per cluster to save')
     parser.add_argument('--so', action='store_true', help='Enable strict overlap filtering')
 
     args = parser.parse_args()
@@ -124,7 +125,7 @@ def main():
     if markers_df is None or markers_df.empty:
         print("⚠️ No markers passed filtering. No files written.")
     else:
-        save_results(markers_df, cluster_column, args.output_all, args.output_top3)
+        save_results(markers_df, cluster_column, args.output_all, args.output_top, args.top_n)
 
 if __name__ == '__main__':
     main()
