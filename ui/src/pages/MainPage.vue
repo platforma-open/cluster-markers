@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import '@milaboratories/graph-maker/styles';
-import { PlAgDataTable, PlAgDataTableToolsPanel, PlBlockPage, PlBtnGhost, PlDropdownRef, PlMaskIcon24, PlSlideModal } from '@platforma-sdk/ui-vue';
+import { PlAgDataTable, PlAgDataTableToolsPanel, PlNumberField, PlBlockPage, PlBtnGhost, PlDropdownRef, PlMaskIcon24, PlSlideModal } from '@platforma-sdk/ui-vue';
 import type { PlDataTableSettings } from '@platforma-sdk/ui-vue';
 import { useApp } from '../app';
 import { computed, reactive } from 'vue';
@@ -61,6 +61,14 @@ function setInput(inputRef?: PlRef) {
         v-model="app.model.args.clusterAnnotationRef" :options="app.model.outputs.clusterAnnotationOptions"
         label="Cluster annotation"
       />
+      <PlNumberField
+        v-model="app.model.args.topN"
+        label="Number of top markers" :minValue="1" :step="1"
+      >
+        <template #tooltip>
+          Select number of top markers to visualize.
+        </template>
+      </PlNumberField>
     </PlSlideModal>
   </PlBlockPage>
 </template>

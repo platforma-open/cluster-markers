@@ -26,17 +26,24 @@ export type BlockArgs = {
   countsRef?: PlRef;
   clusterAnnotationRef?: PlRef;
   title?: string;
+  topN?: number;
 };
 
 export const model = BlockModel.create()
 
   .withArgs<BlockArgs>({
+    topN: 3,
   })
 
   .withUiState<UiState>({
     graphStateBubble: {
       title: 'Dotplot',
       template: 'bubble',
+      layersSettings: {
+        bubble: {
+          normalizationDirection: null,
+        },
+      },
     },
     graphStateUMAP: {
       title: 'UMAP',
@@ -85,8 +92,8 @@ export const model = BlockModel.create()
     };
   })
 
-  .output('clusterMarkersTop3Pf', (ctx): PFrameHandle | undefined => {
-    const pCols = ctx.outputs?.resolve('clusterMarkersTop3Pf')?.getPColumns();
+  .output('clusterMarkersTopPf', (ctx): PFrameHandle | undefined => {
+    const pCols = ctx.outputs?.resolve('clusterMarkersTopPf')?.getPColumns();
     if (pCols === undefined) {
       return undefined;
     }

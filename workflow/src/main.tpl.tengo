@@ -19,6 +19,7 @@ wf.body(func(args) {
 	rawCounts := args.resolvedInput
 	inputSpec := rawCounts.spec
 	species := inputSpec.domain["pl7.app/species"]
+	topN := args.topN
 
 	clusterAnnotation := args.resolvedClusterAnnotation
 	clusterColumn := clusterAnnotation.spec.annotations["pl7.app/label"]
@@ -34,9 +35,10 @@ wf.body(func(args) {
 		arg("--counts").arg("rawCounts.csv").
 		arg("--clusters").arg("clusters.csv").
 		arg("--cluster_column").arg(string(clusterColumn)).
+		arg("--top_n").arg(string(topN)).
 		// arg("--species").arg(string(species)).
 		saveFile("cluster_markers.csv").
-		saveFile("top3_markers.csv").
+		saveFile("top_markers.csv").
 		printErrStreamToStdout().
 		saveStdoutContent().
 		cache(24 * 60 * 60 * 1000).
@@ -44,13 +46,13 @@ wf.body(func(args) {
 
 	clusterMarkersImportParams := pfClusterMarkersConv.getColumns(blockId, species)
 	clusterMarkersPf := xsv.importFile(clusterMarkers.getFile("cluster_markers.csv"), "csv", clusterMarkersImportParams)
-	clusterMarkersTop3Pf := xsv.importFile(clusterMarkers.getFile("top3_markers.csv"), "csv", clusterMarkersImportParams)
+	clusterMarkersTopPf := xsv.importFile(clusterMarkers.getFile("top_markers.csv"), "csv", clusterMarkersImportParams)
 
 
 	return {
 		outputs: {
 			clusterMarkersPf: pframes.exportFrame(clusterMarkersPf),
-			clusterMarkersTop3Pf: pframes.exportFrame(clusterMarkersTop3Pf)
+			clusterMarkersTopPf: pframes.exportFrame(clusterMarkersTopPf)
 		},
 		exports: {}
 	}
