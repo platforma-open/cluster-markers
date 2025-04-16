@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.2.0
+
+### Minor Changes
+
+- fc0481c: Added option to select number of marker genes to be used in visualizations
+
 ## 1.1.1
 
 ### Patch Changes
