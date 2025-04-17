@@ -1,5 +1,18 @@
 # @platforma-open/milaboratories.cluster-markers
 
+## 1.2.0
+
+### Minor Changes
+
+- 5d13c7b: Included arguments to select Fold Change and P-Value cutoffs
+
+### Patch Changes
+
+- Updated dependencies [5d13c7b]
+  - @platforma-open/milaboratories.cluster-markers.workflow@1.4.0
+  - @platforma-open/milaboratories.cluster-markers.model@1.3.0
+  - @platforma-open/milaboratories.cluster-markers.ui@1.4.0
+
 ## 1.1.3
 
 ### Patch Changes

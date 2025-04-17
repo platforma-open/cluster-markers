@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.model
 
+## 1.3.0
+
+### Minor Changes
+
+- 5d13c7b: Included arguments to select Fold Change and P-Value cutoffs
+
 ## 1.2.0
 
 ### Minor Changes
