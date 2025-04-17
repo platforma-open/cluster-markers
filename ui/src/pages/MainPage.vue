@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import '@milaboratories/graph-maker/styles';
-import { PlAgDataTable, PlAgDataTableToolsPanel, PlNumberField, PlBlockPage, PlBtnGhost, PlDropdownRef, PlMaskIcon24, PlSlideModal } from '@platforma-sdk/ui-vue';
+import { PlAgDataTable, PlAgDataTableToolsPanel, PlNumberField, PlBlockPage, PlBtnGhost, PlDropdownRef, PlMaskIcon24, PlSlideModal, PlRow, PlAlert } from '@platforma-sdk/ui-vue';
 import type { PlDataTableSettings } from '@platforma-sdk/ui-vue';
 import { useApp } from '../app';
 import { computed, reactive } from 'vue';
@@ -69,6 +69,28 @@ function setInput(inputRef?: PlRef) {
           Select number of top markers to visualize.
         </template>
       </PlNumberField>
+      <PlRow>
+        <PlNumberField
+          v-model="app.model.args.logfcCutoff"
+          label="Log2(FC)" :minValue="0" :step="0.1"
+        >
+          <template #tooltip>
+            Select a valid absolute log2(FC) threshold for identifying
+            significant cluster markers.
+          </template>
+        </PlNumberField>
+        <PlNumberField
+          v-model="app.model.args.pvalCutoff"
+          label="Adjusted p-value" :minValue="0" :maxValue="1" :step="0.01"
+        />
+      </PlRow>
+      <!-- Add warnings if selected threshold are out of most commonly used bounds -->
+      <PlAlert v-if="app.model.args.pvalCutoff > 0.05" type="warn">
+        {{ "Warning: The selected adjusted p-value threshold is higher than the most commonly used 0.05" }}
+      </PlAlert>
+      <PlAlert v-if="app.model.args.logfcCutoff < 0.6" type="warn">
+        {{ "Warning: The selected Log2(FC) threshold may be too low for most use cases" }}
+      </PlAlert>
     </PlSlideModal>
   </PlBlockPage>
 </template>

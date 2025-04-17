@@ -20,6 +20,9 @@ wf.body(func(args) {
 	inputSpec := rawCounts.spec
 	species := inputSpec.domain["pl7.app/species"]
 	topN := args.topN
+	// strictOverlap := args.strictOverlap
+	logfcCutoff := args.logfcCutoff
+	pvalCutoff := args.pvalCutoff
 
 	clusterAnnotation := args.resolvedClusterAnnotation
 	clusterColumn := clusterAnnotation.spec.annotations["pl7.app/label"]
@@ -36,6 +39,9 @@ wf.body(func(args) {
 		arg("--clusters").arg("clusters.csv").
 		arg("--cluster_column").arg(string(clusterColumn)).
 		arg("--top_n").arg(string(topN)).
+		// arg("--so").arg("true").
+		arg("--logfc_cutoff").arg(string(logfcCutoff)).
+		arg("--pval_cutoff").arg(string(pvalCutoff)).
 		// arg("--species").arg(string(species)).
 		saveFile("cluster_markers.csv").
 		saveFile("top_markers.csv").
