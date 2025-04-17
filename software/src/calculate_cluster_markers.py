@@ -30,7 +30,7 @@ def create_anndata(merged_df, cluster_column):
     sc.pp.log1p(adata)
     return adata
 
-def find_markers(adata, cluster_column, strict_overlap):
+def find_markers(adata, cluster_column, strict_overlap, logfc_cutoff, pval_cutoff):
     sc.tl.rank_genes_groups(adata, groupby=cluster_column, method='wilcoxon')
     adata.uns['rank_genes_groups'] = {
         k: (v.copy() if isinstance(v, pd.DataFrame) else v)
@@ -54,7 +54,7 @@ def find_markers(adata, cluster_column, strict_overlap):
     expr_mean = mean_expr.groupby(cluster_column).mean().T
     expr_mean.columns = expr_mean.columns.astype(str)
 
-    markers_df = markers_df[(markers_df['Log2FC'] >= 1) & (markers_df['Adjusted p-value'] <= 0.01)]
+    markers_df = markers_df[(markers_df['Log2FC'] >= logfc_cutoff) & (markers_df['Adjusted p-value'] <= pval_cutoff)]
 
     filtered = []
     for _, row in markers_df.iterrows():
@@ -115,12 +115,20 @@ def main():
     parser.add_argument('--output_top', default='top_markers.csv', help='Output file for top markers per cluster')
     parser.add_argument('--top_n', type=int, default=3, help='Number of top markers per cluster to save')
     parser.add_argument('--so', action='store_true', help='Enable strict overlap filtering')
+    parser.add_argument('--logfc_cutoff', type=float, default=1.0, help='Minimum log2 fold change to consider')
+    parser.add_argument('--pval_cutoff', type=float, default=0.01, help='Maximum adjusted p-value to consider')
 
     args = parser.parse_args()
 
     merged_df, cluster_column = load_data(args.counts, args.clusters, args.cluster_column)
     adata = create_anndata(merged_df, cluster_column)
-    markers_df = find_markers(adata, cluster_column, strict_overlap=args.so)
+    markers_df = find_markers(
+        adata,
+        cluster_column,
+        strict_overlap=args.so,
+        logfc_cutoff=args.logfc_cutoff,
+        pval_cutoff=args.pval_cutoff
+    )
 
     if markers_df is None or markers_df.empty:
         print("⚠️ No markers passed filtering. No files written.")

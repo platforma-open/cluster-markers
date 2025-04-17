@@ -26,13 +26,17 @@ export type BlockArgs = {
   countsRef?: PlRef;
   clusterAnnotationRef?: PlRef;
   title?: string;
-  topN?: number;
+  topN: number;
+  logfcCutoff: number;
+  pvalCutoff: number;
 };
 
 export const model = BlockModel.create()
 
   .withArgs<BlockArgs>({
     topN: 3,
+    logfcCutoff: 1.0,
+    pvalCutoff: 0.01,
   })
 
   .withUiState<UiState>({
