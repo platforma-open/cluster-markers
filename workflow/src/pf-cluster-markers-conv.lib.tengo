@@ -98,19 +98,7 @@ getColumns := func(blockId, species) {
 						"pl7.app/table/orderPriority": "5"
 					}
 				}
-			},
-		{
-				"column": "Regulation",
-				"id": "regulationDirection",
-				"spec": {
-					"name": "pl7.app/rna-seq/regulationDirection",
-					"valueType": "String",
-					"annotations": {
-						"pl7.app/label": "Regulation direction",
-						"pl7.app/table/orderPriority": "5"
-					}
-				}
-		}
+			}
       ],
     "storageFormat": "Binary",
     "partitionKeyLength": 1

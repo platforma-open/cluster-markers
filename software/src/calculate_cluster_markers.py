@@ -108,8 +108,19 @@ def save_results(markers_df, cluster_column, output_all, output_top, top_n):
     top_df.to_csv(output_top, index=False)
 
 # Save DEG list for functional analysis block
-def save_deg_df(markers_df):
+def save_deg_df(markers_df, logfc_cutoff):
+
+    markers_df["Regulation"] = np.where(
+        (markers_df["Log2FC"] > logfc_cutoff), "Up",
+        np.where(
+            (markers_df["Log2FC"] < -logfc_cutoff), "Down",
+            "NS"
+        )
+    )
+
     deg_df = markers_df[["Cluster", "Ensembl Id", "Log2FC", "Regulation"]].copy()
+
+    # Save DEG as CSV
     deg_df.to_csv("DEG.csv", index=False)
 
 def main():
@@ -139,17 +150,8 @@ def main():
     if markers_df is None or markers_df.empty:
         print("⚠️ No markers passed filtering. No files written.")
     else:
-        # Add regulation direction according to threshold
-        markers_df["Regulation"] = np.where(
-            (markers_df["Log2FC"] > args.logfc_cutoff), "Up",
-            np.where(
-                (markers_df["Log2FC"] < -args.logfc_cutoff), "Down",
-                "NS"
-            )
-        )
-
         save_results(markers_df, cluster_column, args.output_all, args.output_top, args.top_n)
-        save_deg_df(markers_df)
+        save_deg_df(markers_df, args.logfc_cutoff)
 
 if __name__ == '__main__':
     main()
