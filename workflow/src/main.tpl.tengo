@@ -5,6 +5,7 @@ xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
 
 pfClusterMarkersConv := import(":pf-cluster-markers-conv")
+pfDEGConversion := import(":pf-DEG-conv")
 
 wf.prepare(func(args){
 	return {
@@ -45,6 +46,7 @@ wf.body(func(args) {
 		// arg("--species").arg(string(species)).
 		saveFile("cluster_markers.csv").
 		saveFile("top_markers.csv").
+		saveFile("DEG.csv").
 		printErrStreamToStdout().
 		saveStdoutContent().
 		cache(24 * 60 * 60 * 1000).
@@ -54,13 +56,27 @@ wf.body(func(args) {
 	clusterMarkersPf := xsv.importFile(clusterMarkers.getFile("cluster_markers.csv"), "csv", clusterMarkersImportParams)
 	clusterMarkersTopPf := xsv.importFile(clusterMarkers.getFile("top_markers.csv"), "csv", clusterMarkersImportParams)
 
+	// Construct degPF for export for functional analysis
+	DEGImportParams := pfDEGConversion.getColumns(blockId, species)
+	DEGPf := xsv.importFile(clusterMarkers.getFile("DEG.csv"), "csv", DEGImportParams)
+
+	exports := {
+        foldChange: {
+            spec: DEGPf["log2foldchange.spec"],
+            data: DEGPf["log2foldchange.data"]
+        },
+        regDir: {
+            spec: DEGPf["regulationDirection.spec"],
+            data: DEGPf["regulationDirection.data"]
+        }
+    }
 
 	return {
 		outputs: {
 			clusterMarkersPf: pframes.exportFrame(clusterMarkersPf),
 			clusterMarkersTopPf: pframes.exportFrame(clusterMarkersTopPf)
 		},
-		exports: {}
+		exports: exports
 	}
 })
 

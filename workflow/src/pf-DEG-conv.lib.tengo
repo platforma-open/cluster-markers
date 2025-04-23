@@ -34,19 +34,6 @@ getColumns := func(blockId, species) {
       }  
       ],
     "columns": [
-			// {
-			// 	"column": "Gene symbol",
-			// 	"id": "genesymbol",
-			// 	"allowNA": true,
-			// 	"spec": {
-			// 		"name": "pl7.app/rna-seq/genesymbol",
-			// 		"valueType": "String",
-			// 		"annotations": {
-			// 			"pl7.app/label": "Gene symbol",
-			// 			"pl7.app/table/orderPriority": "80"
-			// 		}
-			// 	}
-			// },
 			{
 				"column": "Log2FC",
 				"id": "log2foldchange",
@@ -57,45 +44,6 @@ getColumns := func(blockId, species) {
 					"annotations": {
 						"pl7.app/label": "Log2FC",
 						"pl7.app/table/orderPriority": "60"
-					}
-				}
-			},
-      {
-				"column": "Adjusted p-value",
-				"id": "padj",
-				"allowNA": true,
-				"spec": {
-					"name": "pl7.app/rna-seq/padj",
-					"valueType": "Double",
-					"annotations": {
-						"pl7.app/label": "Adjusted p-value",
-						"pl7.app/table/orderPriority": "20"
-					}
-				}
-			},
-      {
-				"column": "Percentage cells",
-				"id": "percentcells",
-				"allowNA": true,
-				"spec": {
-					"name": "pl7.app/rna-seq/percentcells",
-					"valueType": "Double",
-					"annotations": {
-						"pl7.app/label": "Cell percentage expressed",
-						"pl7.app/table/orderPriority": "10"
-					}
-				}
-			},
-		{
-				"column": "Mean expression",
-				"id": "meanexpression",
-				"allowNA": true,
-				"spec": {
-					"name": "pl7.app/rna-seq/meanexpression",
-					"valueType": "Double",
-					"annotations": {
-						"pl7.app/label": "Mean expression in cluster",
-						"pl7.app/table/orderPriority": "5"
 					}
 				}
 			},
@@ -110,7 +58,7 @@ getColumns := func(blockId, species) {
 						"pl7.app/table/orderPriority": "5"
 					}
 				}
-		}
+			}
       ],
     "storageFormat": "Binary",
     "partitionKeyLength": 1
