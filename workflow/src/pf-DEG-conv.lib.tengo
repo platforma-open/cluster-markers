@@ -28,7 +28,7 @@ getColumns := func(blockId, species) {
 						},
 						"annotations": {
 							"pl7.app/label": "Ensembl Id",
-              "pl7.app/table/visibility": "optional"
+							"pl7.app/table/visibility": "optional"
 						}
 					}
       }  
@@ -43,7 +43,8 @@ getColumns := func(blockId, species) {
 					"valueType": "Double",
 					"annotations": {
 						"pl7.app/label": "Log2FC",
-						"pl7.app/table/orderPriority": "60"
+						"pl7.app/table/orderPriority": "60",
+						"pl7.app/isSubset": "true"
 					}
 				}
 			},
@@ -55,7 +56,9 @@ getColumns := func(blockId, species) {
 					"valueType": "String",
 					"annotations": {
 						"pl7.app/label": "Regulation direction",
-						"pl7.app/table/orderPriority": "5"
+						"pl7.app/table/orderPriority": "5",
+						"pl7.app/isSubset": "true"
+
 					}
 				}
 			}
