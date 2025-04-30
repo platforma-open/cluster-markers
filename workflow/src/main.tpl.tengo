@@ -61,7 +61,7 @@ wf.body(func(args) {
 	DEGPf := xsv.importFile(clusterMarkers.getFile("DEG.csv"), "csv", DEGImportParams)
 
 	exports := {
-        foldChange: {
+        DEG: {
             spec: DEGPf["log2foldchange.spec"],
             data: DEGPf["log2foldchange.data"]
         },

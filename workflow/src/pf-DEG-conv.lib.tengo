@@ -40,10 +40,15 @@ getColumns := func(blockId, species) {
 				"id": "log2foldchange",
 				"allowNA": true,
 				"spec": {
-					"name": "pl7.app/rna-seq/log2foldchange",
+					//"name": "pl7.app/rna-seq/log2foldchange",
+					"name": "pl7.app/rna-seq/DEG",
+					"domain" : {
+						"pl7.app/species": species
+					},
 					"valueType": "Double",
 					"annotations": {
 						"pl7.app/label": "Log2FC",
+						"pl7.app/table/hValue": "true",
 						"pl7.app/table/orderPriority": "60",
 						"pl7.app/isSubset": "true"
 					}
@@ -54,6 +59,9 @@ getColumns := func(blockId, species) {
 				"id": "regulationDirection",
 				"spec": {
 					"name": "pl7.app/rna-seq/regulationDirection",
+					"domain" : {
+						"pl7.app/species": species
+					},
 					"valueType": "String",
 					"annotations": {
 						"pl7.app/label": "Regulation direction",
