@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.4.0
+
+### Minor Changes
+
+- 4c10779: Add DEG list exports for functional analysis and filtering
+
 ## 1.3.0
 
 ### Minor Changes
