@@ -3,6 +3,7 @@ import scanpy as sc
 import anndata as ad
 import argparse
 import warnings
+import numpy as np
 
 # Silence scanpy/pandas warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -106,6 +107,22 @@ def save_results(markers_df, cluster_column, output_all, output_top, top_n):
     top_df = markers_df.groupby('Cluster', observed=False).head(top_n)
     top_df.to_csv(output_top, index=False)
 
+# Save DEG list for functional analysis block
+def save_deg_df(markers_df, logfc_cutoff):
+
+    markers_df["Regulation"] = np.where(
+        (markers_df["Log2FC"] > logfc_cutoff), "Up",
+        np.where(
+            (markers_df["Log2FC"] < -logfc_cutoff), "Down",
+            "NS"
+        )
+    )
+
+    deg_df = markers_df[["Cluster", "Ensembl Id", "Log2FC", "Regulation"]].copy()
+
+    # Save DEG as CSV
+    deg_df.to_csv("DEG.csv", index=False)
+
 def main():
     parser = argparse.ArgumentParser(description='Find cluster markers from single-cell RNA-seq data.')
     parser.add_argument('--counts', required=True, help='CSV file with counts in long format')
@@ -134,6 +151,7 @@ def main():
         print("⚠️ No markers passed filtering. No files written.")
     else:
         save_results(markers_df, cluster_column, args.output_all, args.output_top, args.top_n)
+        save_deg_df(markers_df, args.logfc_cutoff)
 
 if __name__ == '__main__':
     main()
