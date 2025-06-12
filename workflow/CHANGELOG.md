@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.5.1
+
+### Patch Changes
+
+- f1053ef: chore: update deps
+
 ## 1.5.0
 
 ### Minor Changes
