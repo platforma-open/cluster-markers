@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.5.0
+
+### Minor Changes
+
+- 72dc2fe: allow create venv on Windows
+
 ## 1.4.0
 
 ### Minor Changes
