@@ -29,6 +29,7 @@ export type BlockArgs = {
   topN: number;
   logfcCutoff: number;
   pvalCutoff: number;
+  strictOverlap: boolean;
 };
 
 export const model = BlockModel.create()
@@ -37,6 +38,7 @@ export const model = BlockModel.create()
     topN: 3,
     logfcCutoff: 1.0,
     pvalCutoff: 0.01,
+    strictOverlap: false,
   })
 
   .withUiState<UiState>({

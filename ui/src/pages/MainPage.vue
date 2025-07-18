@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import '@milaboratories/graph-maker/styles';
-import { PlAgDataTableV2, PlAlert, PlBlockPage, PlBtnGhost, PlDropdownRef, PlMaskIcon24, PlNumberField, PlRow, PlSlideModal, usePlDataTableSettingsV2 } from '@platforma-sdk/ui-vue';
+import { PlAgDataTableV2, PlAlert, PlBlockPage, PlBtnGhost, PlBtnGroup, PlDropdownRef, PlMaskIcon24, PlNumberField, PlRow, PlSlideModal, usePlDataTableSettingsV2 } from '@platforma-sdk/ui-vue';
 import { useApp } from '../app';
 import { reactive } from 'vue';
 import type { PlRef } from '@platforma-sdk/model';
@@ -12,6 +12,11 @@ const tableSettings = usePlDataTableSettingsV2({
   model: () => app.model.outputs.clusterMarkersPt,
   sheets: () => app.model.outputs.clusterMarkersSheets,
 });
+
+const overlapOptions = [
+  { text: 'Non-exclusive', value: false },
+  { text: 'Strict overlap', value: true },
+];
 
 const data = reactive<{
   settingsOpen: boolean;
@@ -64,6 +69,20 @@ function setInput(inputRef?: PlRef) {
           Select number of top markers to visualize.
         </template>
       </PlNumberField>
+      <PlBtnGroup
+        v-model="app.model.args.strictOverlap"
+        label="Overlap filtering"
+        :options="overlapOptions"
+      >
+        <template #tooltip>
+          <div>
+            <strong>Overlap Filtering</strong><br/>
+            Controls how strictly cluster markers are filtered based on expression overlap between clusters.<br/><br/>
+            <strong>Non-exclusive:</strong> Genes are considered markers if expressed in at least 20% of cells in the cluster.<br/><br/>
+            <strong>Strict overlap:</strong> Genes are considered markers only if expressed in at least 20% of cells in the cluster AND less than 20% of cells in other clusters.<br/><br/>
+          </div>
+        </template>
+      </PlBtnGroup>
       <PlRow>
         <PlNumberField
           v-model="app.model.args.logfcCutoff"
