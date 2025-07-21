@@ -36,7 +36,7 @@ function setInput(inputRef?: PlRef) {
 
 <template>
   <PlBlockPage>
-    <template #title>Cluster Markers</template>
+    <template #title>Cluster Marker Discovery</template>
     <template #append>
       <PlBtnGhost @click.stop="() => data.settingsOpen = true">
         Settings
@@ -63,23 +63,26 @@ function setInput(inputRef?: PlRef) {
       />
       <PlNumberField
         v-model="app.model.args.topN"
-        label="Number of top markers" :minValue="1" :step="1"
+        label="Top markers per cluster" :minValue="1" :step="1"
       >
         <template #tooltip>
-          Select number of top markers to visualize.
+          <div>
+            <strong>Number of top markers to display</strong><br/>
+            Determines how many of the most significant marker genes will be shown for each cluster in the results table. Higher values provide more comprehensive marker profiles but may include less specific markers.
+          </div>
         </template>
       </PlNumberField>
       <PlBtnGroup
         v-model="app.model.args.strictOverlap"
-        label="Overlap filtering"
+        label="Marker specificity mode"
         :options="overlapOptions"
       >
         <template #tooltip>
           <div>
-            <strong>Overlap Filtering</strong><br/>
-            Controls how strictly cluster markers are filtered based on expression overlap between clusters.<br/><br/>
-            <strong>Non-exclusive:</strong> Genes are considered markers if expressed in at least 20% of cells in the cluster.<br/><br/>
-            <strong>Strict overlap:</strong> Genes are considered markers only if expressed in at least 20% of cells in the cluster AND less than 20% of cells in other clusters.<br/><br/>
+            <strong>Marker specificity filtering</strong><br/>
+            Controls how strictly markers are filtered based on their expression specificity to clusters.<br/><br/>
+            <strong>Non-exclusive:</strong> Includes genes expressed in ≥20% of cells within the target cluster, regardless of expression in other clusters. More permissive, captures broader marker profiles.<br/><br/>
+            <strong>Strict overlap:</strong> Requires genes to be expressed in ≥20% of cells in the target cluster AND &lt;20% of cells in other clusters. More stringent, identifies highly cluster-specific markers.<br/><br/>
           </div>
         </template>
       </PlBtnGroup>
@@ -89,21 +92,30 @@ function setInput(inputRef?: PlRef) {
           label="Log2(FC)" :minValue="0" :step="0.1"
         >
           <template #tooltip>
-            Select a valid absolute log2(FC) threshold for identifying
-            significant cluster markers.
+            <div>
+              <strong>Log2 fold-change threshold</strong><br/>
+              Minimum absolute log2 fold-change required for a gene to be considered a cluster marker. Higher values (e.g., 1.0-2.0) identify more dramatically upregulated genes, while lower values (e.g., 0.5-0.8) capture subtler expression differences.
+            </div>
           </template>
         </PlNumberField>
         <PlNumberField
           v-model="app.model.args.pvalCutoff"
           label="Adjusted p-value" :minValue="0" :maxValue="1" :step="0.01"
-        />
+        >
+          <template #tooltip>
+            <div>
+              <strong>Statistical significance threshold</strong><br/>
+              Maximum adjusted p-value for marker gene significance. Standard values are 0.05 (5% false discovery rate) or 0.01 (1% false discovery rate) for more stringent filtering.
+            </div>
+          </template>
+        </PlNumberField>
       </PlRow>
       <!-- Add warnings if selected threshold are out of most commonly used bounds -->
       <PlAlert v-if="app.model.args.pvalCutoff > 0.05" type="warn">
-        {{ "Warning: The selected adjusted p-value threshold is higher than the most commonly used 0.05" }}
+        {{ "Warning: The selected adjusted p-value threshold is higher than the commonly recommended 0.05" }}
       </PlAlert>
       <PlAlert v-if="app.model.args.logfcCutoff < 0.6" type="warn">
-        {{ "Warning: The selected Log2(FC) threshold may be too low for most use cases" }}
+        {{ "Warning: The selected Log2(FC) threshold may be too low for identifying robust cluster markers" }}
       </PlAlert>
     </PlSlideModal>
   </PlBlockPage>

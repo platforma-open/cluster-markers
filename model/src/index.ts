@@ -114,7 +114,7 @@ export const model = BlockModel.create()
 
   .sections((_ctx) => ([
     { type: 'link', href: '/', label: 'Main' },
-    { type: 'link', href: '/umap', label: 'UMAP' },
+    // { type: 'link', href: '/umap', label: 'UMAP' },
     { type: 'link', href: '/dotplot', label: 'Dotplot' },
   ]))
 
