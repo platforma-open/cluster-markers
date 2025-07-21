@@ -28,7 +28,7 @@ getColumns := func(blockId, species) {
 						},
 						"annotations": {
 							"pl7.app/label": "Ensembl Id",
-              "pl7.app/table/visibility": "optional"
+							"pl7.app/table/visibility": "default"
 						}
 					}
       }  
@@ -56,7 +56,8 @@ getColumns := func(blockId, species) {
 					"valueType": "Double",
 					"annotations": {
 						"pl7.app/label": "Log2FC",
-						"pl7.app/table/orderPriority": "60"
+						"pl7.app/table/orderPriority": "60",
+						"pl7.app/format": ".2f"
 					}
 				}
 			},
@@ -69,7 +70,8 @@ getColumns := func(blockId, species) {
 					"valueType": "Double",
 					"annotations": {
 						"pl7.app/label": "Adjusted p-value",
-						"pl7.app/table/orderPriority": "20"
+						"pl7.app/table/orderPriority": "20",
+						"pl7.app/format": ".2e"
 					}
 				}
 			},
@@ -82,7 +84,8 @@ getColumns := func(blockId, species) {
 					"valueType": "Double",
 					"annotations": {
 						"pl7.app/label": "Cell percentage expressed",
-						"pl7.app/table/orderPriority": "10"
+						"pl7.app/table/orderPriority": "10",
+						"pl7.app/format": ".2f"
 					}
 				}
 			},
@@ -95,7 +98,8 @@ getColumns := func(blockId, species) {
 					"valueType": "Double",
 					"annotations": {
 						"pl7.app/label": "Mean expression in cluster",
-						"pl7.app/table/orderPriority": "5"
+						"pl7.app/table/orderPriority": "5",
+						"pl7.app/format": ".2f"
 					}
 				}
 			}

@@ -2,16 +2,16 @@ import type { GraphMakerState } from '@milaboratories/graph-maker';
 import type {
   InferOutputsType,
   PFrameHandle,
-  PlDataTableState,
-  PlRef } from '@platforma-sdk/model';
+  PlDataTableStateV2,
+  PlRef,
+} from '@platforma-sdk/model';
 import {
   BlockModel,
   createPFrameForGraphs,
-  createPlDataTable,
+  createPlDataTableStateV2,
+  createPlDataTableV2,
   createPlDataTableSheet,
   getUniquePartitionKeys,
-  isPColumn,
-  // isPColumn,
   isPColumnSpec,
 } from '@platforma-sdk/model';
 
@@ -19,7 +19,7 @@ export type UiState = {
   graphStateBubble: GraphMakerState;
   graphStateUMAP: GraphMakerState;
   graphStateTSNE: GraphMakerState;
-  tableState: PlDataTableState;
+  tableState: PlDataTableStateV2;
 };
 
 export type BlockArgs = {
@@ -29,6 +29,7 @@ export type BlockArgs = {
   topN: number;
   logfcCutoff: number;
   pvalCutoff: number;
+  strictOverlap: boolean;
 };
 
 export const model = BlockModel.create()
@@ -37,6 +38,7 @@ export const model = BlockModel.create()
     topN: 3,
     logfcCutoff: 1.0,
     pvalCutoff: 0.01,
+    strictOverlap: false,
   })
 
   .withUiState<UiState>({
@@ -57,13 +59,7 @@ export const model = BlockModel.create()
       title: 'tSNE',
       template: 'dots',
     },
-    tableState: {
-      gridState: {},
-      pTableParams: {
-        sorting: [],
-        filters: [],
-      },
-    },
+    tableState: createPlDataTableStateV2(),
   })
 
   .output('countsOptions', (ctx) =>
@@ -84,16 +80,22 @@ export const model = BlockModel.create()
       return undefined;
     }
 
+    return createPlDataTableV2(ctx, pCols, ctx.uiState.tableState);
+  })
+
+  .output('clusterMarkersSheets', (ctx) => {
+    const pCols = ctx.outputs?.resolve('clusterMarkersPf')?.getPColumns();
+    if (pCols === undefined) {
+      return undefined;
+    }
+
     const anchor = pCols[0];
     if (!anchor) return undefined;
 
     const r = getUniquePartitionKeys(anchor.data);
     if (!r) return undefined;
 
-    return {
-      table: createPlDataTable(ctx, pCols, ctx.uiState?.tableState),
-      sheets: r.map((values, i) => createPlDataTableSheet(ctx, anchor.spec.axesSpec[i], values)),
-    };
+    return r.map((values, i) => createPlDataTableSheet(ctx, anchor.spec.axesSpec[i], values));
   })
 
   .output('clusterMarkersTopPf', (ctx): PFrameHandle | undefined => {
@@ -104,21 +106,15 @@ export const model = BlockModel.create()
     return createPFrameForGraphs(ctx, pCols);
   })
 
-  .output('UMAPPf', (ctx): PFrameHandle | undefined => {
-    return createPFrameForGraphs(ctx,
-      ctx.resultPool
-        .getData()
-        .entries.map((c) => c.obj)
-        .filter(isPColumn)
-        .filter((column) => column.spec.name.includes('umap')),
-    );
+  .output('umapPf', (ctx): PFrameHandle | undefined => {
+    return createPFrameForGraphs(ctx);
   })
 
   .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
   .sections((_ctx) => ([
     { type: 'link', href: '/', label: 'Main' },
-    { type: 'link', href: '/umap', label: 'UMAP' },
+    // { type: 'link', href: '/umap', label: 'UMAP' },
     { type: 'link', href: '/dotplot', label: 'Dotplot' },
   ]))
 
