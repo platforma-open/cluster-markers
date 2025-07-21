@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.model
 
+## 1.4.0
+
+### Minor Changes
+
+- 42f571e: Update SDK packages, minor plot fixes, migrate to PlAgDataTableV2 and expose option for cluster marker overlap filtering
+
 ## 1.3.0
 
 ### Minor Changes
