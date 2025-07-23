@@ -40,6 +40,20 @@ export const model = BlockModel.create()
     strictOverlap: false,
   })
 
+  .argsValid((ctx) => {
+    // Check if cluster annotation is selected
+    if (!ctx.args.clusterAnnotationRef) {
+      return false;
+    }
+
+    // Check if topN is a valid positive number
+    if (!ctx.args.topN || ctx.args.topN < 1) {
+      return false;
+    }
+
+    return true;
+  })
+
   .withUiState<UiState>({
     graphStateBubble: {
       title: 'Dotplot',

@@ -90,8 +90,17 @@ wf.body(func(args) {
 	species := inputSpec.domain["pl7.app/species"]
 	topN := args.topN
 	strictOverlap := args.strictOverlap
+	
+	// Assign default values if cleared by user
 	logfcCutoff := args.logfcCutoff
+	if is_undefined(logfcCutoff) {
+		logfcCutoff = 1.0
+	}
+	
 	pvalCutoff := args.pvalCutoff
+	if is_undefined(pvalCutoff) {
+		pvalCutoff = 0.01
+	}
 
 	clusterColumn := clusterAnnotation.spec.annotations["pl7.app/label"]
 	
