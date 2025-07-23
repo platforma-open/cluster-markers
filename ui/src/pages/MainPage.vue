@@ -3,8 +3,6 @@ import '@milaboratories/graph-maker/styles';
 import { PlAgDataTableV2, PlAlert, PlBlockPage, PlBtnGhost, PlBtnGroup, PlDropdownRef, PlMaskIcon24, PlNumberField, PlRow, PlSlideModal, usePlDataTableSettingsV2 } from '@platforma-sdk/ui-vue';
 import { useApp } from '../app';
 import { reactive } from 'vue';
-import type { PlRef } from '@platforma-sdk/model';
-import { plRefsEqual } from '@platforma-sdk/model';
 
 const app = useApp();
 
@@ -21,16 +19,8 @@ const overlapOptions = [
 const data = reactive<{
   settingsOpen: boolean;
 }>({
-  settingsOpen: app.model.args.countsRef === undefined,
+  settingsOpen: app.model.args.clusterAnnotationRef === undefined,
 });
-
-function setInput(inputRef?: PlRef) {
-  app.model.args.countsRef = inputRef;
-  if (inputRef)
-    app.model.args.title = app.model.outputs.countsOptions?.find((o) => plRefsEqual(o.ref, inputRef))?.label;
-  else
-    app.model.args.title = undefined;
-}
 
 </script>
 
@@ -53,17 +43,20 @@ function setInput(inputRef?: PlRef) {
     <PlSlideModal v-model="data.settingsOpen">
       <template #title>Settings</template>
       <PlDropdownRef
-        v-model="app.model.args.countsRef" :options="app.model.outputs.countsOptions"
-        label="Select dataset"
-        clearable @update:model-value="setInput"
-      />
-      <PlDropdownRef
-        v-model="app.model.args.clusterAnnotationRef" :options="app.model.outputs.clusterAnnotationOptions"
+        v-model="app.model.args.clusterAnnotationRef"
+        :options="app.model.outputs.clusterAnnotationOptions"
         label="Cluster annotation"
+        required
+        :validate="(value: unknown) => value === undefined ? 'Cluster annotation is required' : undefined"
+        clearable
       />
       <PlNumberField
         v-model="app.model.args.topN"
-        label="Top markers per cluster" :minValue="1" :step="1"
+        label="Top markers per cluster"
+        :minValue="1"
+        :step="1"
+        required
+        :validate="(value: number | undefined) => value === undefined || value === null ? 'Top markers per cluster is required' : (value < 1 ? 'Must be at least 1' : undefined)"
       >
         <template #tooltip>
           <div>
@@ -90,6 +83,7 @@ function setInput(inputRef?: PlRef) {
         <PlNumberField
           v-model="app.model.args.logfcCutoff"
           label="Log2(FC)" :minValue="0" :step="0.1"
+          placeholder="1.0"
         >
           <template #tooltip>
             <div>
@@ -101,6 +95,7 @@ function setInput(inputRef?: PlRef) {
         <PlNumberField
           v-model="app.model.args.pvalCutoff"
           label="Adjusted p-value" :minValue="0" :maxValue="1" :step="0.01"
+          placeholder="0.01"
         >
           <template #tooltip>
             <div>

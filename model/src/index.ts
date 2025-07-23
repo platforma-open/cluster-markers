@@ -23,7 +23,6 @@ export type UiState = {
 };
 
 export type BlockArgs = {
-  countsRef?: PlRef;
   clusterAnnotationRef?: PlRef;
   title?: string;
   topN: number;
@@ -39,6 +38,20 @@ export const model = BlockModel.create()
     logfcCutoff: 1.0,
     pvalCutoff: 0.01,
     strictOverlap: false,
+  })
+
+  .argsValid((ctx) => {
+    // Check if cluster annotation is selected
+    if (!ctx.args.clusterAnnotationRef) {
+      return false;
+    }
+
+    // Check if topN is a valid positive number
+    if (!ctx.args.topN || ctx.args.topN < 1) {
+      return false;
+    }
+
+    return true;
   })
 
   .withUiState<UiState>({
@@ -61,12 +74,6 @@ export const model = BlockModel.create()
     },
     tableState: createPlDataTableStateV2(),
   })
-
-  .output('countsOptions', (ctx) =>
-    ctx.resultPool.getOptions((spec) => isPColumnSpec(spec)
-      && spec.name === 'pl7.app/rna-seq/countMatrix' && spec.domain?.['pl7.app/rna-seq/normalized'] === 'false'
-    , { includeNativeLabel: true, addLabelAsSuffix: true }),
-  )
 
   .output('clusterAnnotationOptions', (ctx) =>
     ctx.resultPool.getOptions((spec) => isPColumnSpec(spec)
