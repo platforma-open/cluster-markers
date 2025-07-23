@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.7.0
+
+### Minor Changes
+
+- ae195b9: Add trace to exports
+
 ## 1.6.0
 
 ### Minor Changes
