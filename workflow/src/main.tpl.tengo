@@ -3,6 +3,7 @@ exec := import("@platforma-sdk/workflow-tengo:exec")
 assets:= import("@platforma-sdk/workflow-tengo:assets")
 xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
+pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
 
 pfClusterMarkersConv := import(":pf-cluster-markers-conv")
 pfDEGConversion := import(":pf-DEG-conv")
@@ -65,13 +66,22 @@ wf.body(func(args) {
 	DEGImportParams := pfDEGConversion.getColumns(blockId, species)
 	DEGPf := xsv.importFile(clusterMarkers.getFile("DEG.csv"), "csv", DEGImportParams)
 
+	// Create informative label with relevant cluster markers parameters
+	logfcStr := string(logfcCutoff)
+	pvalStr := string(pvalCutoff)
+	specificityMode := strictOverlap ? "Strict overlap" : "Non-exclusive"
+	
+	traceLabel := "Cluster Markers (" + specificityMode + ", logfc:" + logfcStr + ", pval:" + pvalStr + ")"
+	
+	trace := pSpec.makeTrace(inputSpec, { type: "milaboratories.cluster-markers", importance: 50, label: traceLabel })
+
 	exports := {
         DEG: {
-            spec: DEGPf["log2foldchange.spec"],
+            spec: trace.inject(DEGPf["log2foldchange.spec"]),
             data: DEGPf["log2foldchange.data"]
         },
         regDir: {
-            spec: DEGPf["regulationDirection.spec"],
+            spec: trace.inject(DEGPf["regulationDirection.spec"]),
             data: DEGPf["regulationDirection.data"]
         }
     }
