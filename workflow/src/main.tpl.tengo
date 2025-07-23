@@ -4,21 +4,88 @@ assets:= import("@platforma-sdk/workflow-tengo:assets")
 xsv := import("@platforma-sdk/workflow-tengo:pframes.xsv")
 pframes := import("@platforma-sdk/workflow-tengo:pframes")
 pSpec := import("@platforma-sdk/workflow-tengo:pframes.spec")
+json := import("json")
 
 pfClusterMarkersConv := import(":pf-cluster-markers-conv")
 pfDEGConversion := import(":pf-DEG-conv")
 
 wf.prepare(func(args){
+	// Validate cluster annotation is provided
+	if is_undefined(args.clusterAnnotationRef) {
+		error("Cluster annotation is required")
+	}
+
+	// Create bundle builder for automatic PColumn discovery
+	bundleBuilder := wf.createPBundleBuilder()
+	bundleBuilder.ignoreMissingDomains() // Handle various data types
+	
+	// Add the cluster annotation as the main anchor
+	bundleBuilder.addAnchor("clusters", args.clusterAnnotationRef)
+	
+	// Add query for count matrix - we'll filter this in body based on trace analysis
+	bundleBuilder.addMulti({
+		name: "pl7.app/rna-seq/countMatrix",
+		domain: {
+			"pl7.app/rna-seq/normalized": "false"
+		}
+	}, "countMatrices")
+	
 	return {
-		resolvedInput: wf.resolve(args.countsRef, { errIfMissing: true }),
-		resolvedClusterAnnotation: wf.resolve(args.clusterAnnotationRef, { errIfMissing: true })
+		columns: bundleBuilder.build()
 	}
 })
 
 wf.body(func(args) {
-
+	// Extract block ID as string
 	blockId := wf.blockId().getDataAsJson()
-	rawCounts := args.resolvedInput
+	
+	// Get the resolved cluster annotation
+	columns := args.columns
+	clusterAnnotation := columns.getColumn(args.clusterAnnotationRef)
+	clusterSpec := clusterAnnotation.spec
+	
+	if is_undefined(clusterSpec.annotations) {
+		error("Cluster annotation is missing required metadata.")
+	}
+	
+	clusterTraceAnnotation := clusterSpec.annotations["pl7.app/trace"]
+	if is_undefined(clusterTraceAnnotation) {
+		error("Cluster annotation is missing trace information.")
+	}
+	
+	clusterTrace := json.decode(clusterTraceAnnotation || "[]")
+	
+	// Extract Cell Ranger block ID from trace
+	cellRangerBlockId := undefined
+	for step in clusterTrace {
+		if !is_undefined(step) && !is_undefined(step.type) && step.type == "milaboratories.cell-ranger" {
+			if !is_undefined(step.id) {
+				cellRangerBlockId = step.id
+				break
+			}
+		}
+	}
+	
+	if cellRangerBlockId == undefined {
+		error("Could not find Cell Ranger step in cluster annotation trace.")
+	}
+	
+	// Find the matching count matrix from the available ones
+	allCountMatrices := columns.getColumns("countMatrices")
+	rawCounts := undefined
+	
+	for countMatrix in allCountMatrices {
+		if !is_undefined(countMatrix.spec.domain) && 
+		   countMatrix.spec.domain["pl7.app/blockId"] == cellRangerBlockId {
+			rawCounts = countMatrix
+			break
+		}
+	}
+	
+	if is_undefined(rawCounts) {
+		error("No associated count matrix found.")
+	}
+
 	inputSpec := rawCounts.spec
 	species := inputSpec.domain["pl7.app/species"]
 	topN := args.topN
@@ -26,7 +93,6 @@ wf.body(func(args) {
 	logfcCutoff := args.logfcCutoff
 	pvalCutoff := args.pvalCutoff
 
-	clusterAnnotation := args.resolvedClusterAnnotation
 	clusterColumn := clusterAnnotation.spec.annotations["pl7.app/label"]
 	
 	csvClusters := xsv.exportFrame([clusterAnnotation], "csv", {})
