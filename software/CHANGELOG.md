@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.6.0
+
+### Minor Changes
+
+- 5ca4a45: Update script to work with updated Cell ID axis specifications
+
 ## 1.5.0
 
 ### Minor Changes
