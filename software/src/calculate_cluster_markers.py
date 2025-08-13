@@ -15,9 +15,42 @@ warnings.filterwarnings("ignore", message="Transforming to str index", category=
 
 def load_data(counts_file, clusters_file, cluster_column):
     counts_df = pd.read_csv(counts_file)
-    counts_matrix = counts_df.pivot_table(index=['Sample', 'Cell Barcode'], columns='Ensembl Id', values='Raw gene expression', fill_value=0)
     clusters_df = pd.read_csv(clusters_file)
-    merged_df = counts_matrix.merge(clusters_df[['Sample', 'Cell Barcode', cluster_column]], on=['Sample', 'Cell Barcode'])
+
+    # Normalize minimal expected headers
+    counts_df.columns = [c.strip() for c in counts_df.columns]
+    clusters_df.columns = [c.strip() for c in clusters_df.columns]
+
+    # Map 'Cell ID' -> 'Cell Barcode' (contract: headers are 'Sample' and 'Cell ID')
+    if "Cell Barcode" not in counts_df.columns and "Cell ID" in counts_df.columns:
+        counts_df = counts_df.rename(columns={"Cell ID": "Cell Barcode"})
+    if "Cell Barcode" not in clusters_df.columns and "Cell ID" in clusters_df.columns:
+        clusters_df = clusters_df.rename(columns={"Cell ID": "Cell Barcode"})
+
+    # Validate required headers
+    required_counts = {"Sample", "Cell Barcode", "Ensembl Id", "Raw gene expression"}
+    missing_counts = list(required_counts - set(counts_df.columns))
+    if missing_counts:
+        raise KeyError(f"Counts CSV missing columns: {missing_counts}. Found: {list(counts_df.columns)}")
+
+    required_clusters = {"Sample", "Cell Barcode", cluster_column}
+    missing_clusters = list(required_clusters - set(clusters_df.columns))
+    if missing_clusters:
+        raise KeyError(f"Clusters CSV missing columns: {missing_clusters}. Found: {list(clusters_df.columns)}")
+
+    # Pivot counts into wide matrix [Sample, Cell Barcode] x Genes
+    counts_matrix = counts_df.pivot_table(
+        index=['Sample', 'Cell Barcode'],
+        columns='Ensembl Id',
+        values='Raw gene expression',
+        fill_value=0,
+    )
+
+    # Merge cluster assignments
+    merged_df = counts_matrix.merge(
+        clusters_df[['Sample', 'Cell Barcode', cluster_column]],
+        on=['Sample', 'Cell Barcode']
+    )
     return merged_df, cluster_column
 
 def create_anndata(merged_df, cluster_column):
