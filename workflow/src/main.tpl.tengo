@@ -103,13 +103,18 @@ wf.body(func(args) {
 	}
 
 	clusterColumn := clusterAnnotation.spec.annotations["pl7.app/label"]
-	
-	csvClusters := xsv.exportFrame([clusterAnnotation], "csv", {})
 
-	csvCounts := xsv.exportFrame([rawCounts], "csv", {})
+	// Set default conversion memory and CPU
+	defaultConvMem := "16GiB" // @TODO: set based on the size of the input
+	defaultConvCpu := 1       // @TODO: set based on the size of the input
+	
+	csvClusters := xsv.exportFrame([clusterAnnotation], "csv", { mem: defaultConvMem, cpu: defaultConvCpu })
+	csvCounts := xsv.exportFrame([rawCounts], "csv", { mem: defaultConvMem, cpu: defaultConvCpu })
 
 	clusterMarkers := exec.builder().
 		software(assets.importSoftware("@platforma-open/milaboratories.cluster-markers.software:calculate-clusterMarkers")).
+		mem("32GiB").
+		cpu(1).
 		addFile("rawCounts.csv", csvCounts).
 		addFile("clusters.csv", csvClusters).
 		arg("--counts").arg("rawCounts.csv").
@@ -134,12 +139,12 @@ wf.body(func(args) {
 		run()
 
 	clusterMarkersImportParams := pfClusterMarkersConv.getColumns(blockId, species)
-	clusterMarkersPf := xsv.importFile(clusterMarkers.getFile("cluster_markers.csv"), "csv", clusterMarkersImportParams)
-	clusterMarkersTopPf := xsv.importFile(clusterMarkers.getFile("top_markers.csv"), "csv", clusterMarkersImportParams)
+	clusterMarkersPf := xsv.importFile(clusterMarkers.getFile("cluster_markers.csv"), "csv", clusterMarkersImportParams, { mem: defaultConvMem, cpu: defaultConvCpu })
+	clusterMarkersTopPf := xsv.importFile(clusterMarkers.getFile("top_markers.csv"), "csv", clusterMarkersImportParams, { mem: defaultConvMem, cpu: defaultConvCpu })
 
 	// Construct degPF for export for functional analysis
 	DEGImportParams := pfDEGConversion.getColumns(blockId, species)
-	DEGPf := xsv.importFile(clusterMarkers.getFile("DEG.csv"), "csv", DEGImportParams)
+	DEGPf := xsv.importFile(clusterMarkers.getFile("DEG.csv"), "csv", DEGImportParams, { mem: defaultConvMem, cpu: defaultConvCpu })
 
 	// Create informative label with relevant cluster markers parameters
 	logfcStr := string(logfcCutoff)
