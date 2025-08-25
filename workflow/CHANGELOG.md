@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.8.0
+
+### Minor Changes
+
+- ab44fe9: Add batch support
+
 ## 1.7.1
 
 ### Patch Changes
