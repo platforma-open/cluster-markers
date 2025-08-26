@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.6.1
+
+### Patch Changes
+
+- b0213cd: Updated SDK and added running bar
+
 ## 1.6.0
 
 ### Minor Changes

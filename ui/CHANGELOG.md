@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.ui
 
+## 1.5.1
+
+### Patch Changes
+
+- b0213cd: Updated SDK and added running bar
+
 ## 1.5.0
 
 ### Minor Changes
