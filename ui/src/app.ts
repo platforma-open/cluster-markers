@@ -4,8 +4,11 @@ import MainPage from './pages/MainPage.vue';
 // import UMAP from './pages/UMAP.vue';
 import dotplot from './pages/dotplot.vue';
 
-export const sdkPlugin = defineApp(model, () => {
+export const sdkPlugin = defineApp(model, (app) => {
   return {
+    progress: () => {
+      return app.model.outputs.isRunning;
+    },
     routes: {
       '/': () => MainPage,
       // '/umap': () => UMAP,
