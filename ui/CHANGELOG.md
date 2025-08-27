@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.cluster-markers.ui
 
+## 1.5.2
+
+### Patch Changes
+
+- 75d2a9c: Fixed github build
+- Updated dependencies [75d2a9c]
+  - @platforma-open/milaboratories.cluster-markers.model@1.4.1
+
 ## 1.5.1
 
 ### Patch Changes

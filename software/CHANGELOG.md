@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.6.2
+
+### Patch Changes
+
+- 75d2a9c: Fixed github build
+
 ## 1.6.1
 
 ### Patch Changes

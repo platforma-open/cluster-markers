@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.8.2
+
+### Patch Changes
+
+- 75d2a9c: Fixed github build
+- Updated dependencies [75d2a9c]
+  - @platforma-open/milaboratories.cluster-markers.software@1.6.2
+
 ## 1.8.1
 
 ### Patch Changes
