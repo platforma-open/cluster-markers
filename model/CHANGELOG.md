@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.model
 
+## 1.4.2
+
+### Patch Changes
+
+- 4c6b675: Update SDK
+
 ## 1.4.1
 
 ### Patch Changes
