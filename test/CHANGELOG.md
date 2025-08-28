@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.test
 
+## 1.1.2
+
+### Patch Changes
+
+- 75d2a9c: Fixed github build
+
 ## 1.1.1
 
 ### Patch Changes
