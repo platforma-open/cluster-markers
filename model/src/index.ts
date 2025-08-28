@@ -8,9 +8,9 @@ import type {
 import {
   BlockModel,
   createPFrameForGraphs,
+  createPlDataTableSheet,
   createPlDataTableStateV2,
   createPlDataTableV2,
-  createPlDataTableSheet,
   getUniquePartitionKeys,
   isPColumnSpec,
 } from '@platforma-sdk/model';
@@ -78,7 +78,7 @@ export const model = BlockModel.create()
   .output('clusterAnnotationOptions', (ctx) =>
     ctx.resultPool.getOptions((spec) => isPColumnSpec(spec)
       && spec.name === 'pl7.app/rna-seq/leidencluster'
-    , { includeNativeLabel: true, addLabelAsSuffix: true }),
+    , { includeNativeLabel: false, addLabelAsSuffix: true }),
   )
 
   .output('clusterMarkersPt', (ctx) => {
