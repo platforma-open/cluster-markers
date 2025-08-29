@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.8.3
+
+### Patch Changes
+
+- f46fd1f: Updated trace
+
 ## 1.8.2
 
 ### Patch Changes
