@@ -153,7 +153,7 @@ wf.body(func(args) {
 	
 	traceLabel := "Cluster Markers (" + specificityMode + ", logfc:" + logfcStr + ", pval:" + pvalStr + ")"
 	
-	trace := pSpec.makeTrace(inputSpec, { type: "milaboratories.cluster-markers", importance: 50, label: traceLabel })
+	trace := pSpec.makeTrace(inputSpec, { type: "milaboratories.cluster-markers", importance: 60, label: traceLabel })
 
 	exports := {
         DEG: {
