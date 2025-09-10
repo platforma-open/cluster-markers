@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.6.3
+
+### Patch Changes
+
+- fae48db: Full SDK update
+
 ## 1.6.2
 
 ### Patch Changes

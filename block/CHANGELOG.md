@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers
 
+## 1.2.12
+
+### Patch Changes
+
+- @platforma-open/milaboratories.cluster-markers.workflow@1.8.4
+
 ## 1.2.11
 
 ### Patch Changes
