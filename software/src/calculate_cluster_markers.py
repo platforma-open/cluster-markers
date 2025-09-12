@@ -39,26 +39,49 @@ def load_data(counts_file, clusters_file, cluster_column):
     if missing_clusters:
         raise KeyError(f"Clusters CSV missing columns: {missing_clusters}. Found: {list(clusters_df.columns)}")
 
-    # Pivot counts into wide matrix [Sample, Cell Barcode] x Genes
-    counts_matrix = counts_df.pivot(
-        index=['Sample', 'Cell Barcode'],
-        columns='Ensembl Id',
-        values='Raw gene expression',
-    ).fill_null(0)
-
-    # Merge cluster assignments
-    merged_df = counts_matrix.join(
+    # Join cluster assignments into long-format counts data
+    merged_df = counts_df.join(
         clusters_df.select(['Sample', 'Cell Barcode', cluster_column]),
-        on=['Sample', 'Cell Barcode']
+        on=['Sample', 'Cell Barcode'],
+        how='left'
     )
     return merged_df, cluster_column
 
-def create_anndata(merged_df, cluster_column):
-    X_cols = [c for c in merged_df.columns if c not in ['Sample', 'Cell Barcode', cluster_column]]
-    X = merged_df.select(X_cols).to_numpy()
-    obs = merged_df.select(['Sample', 'Cell Barcode', cluster_column]).to_pandas()
-    var = pd.DataFrame(index=X_cols)
-    adata = ad.AnnData(X=X, obs=obs, var=var)
+def create_anndata(long_df, cluster_column):
+    import scipy.sparse
+
+    # Create unique cell and gene identifiers
+    cells = long_df.select(['Sample', 'Cell Barcode', cluster_column]).unique(
+        subset=['Sample', 'Cell Barcode'],
+        keep='first',
+        maintain_order=True
+    )
+    genes = long_df.select('Ensembl Id').unique(maintain_order=True)
+
+    # Create integer mappings for cells and genes
+    cell_map = cells.with_row_count('cell_idx').select(['Sample', 'Cell Barcode', 'cell_idx'])
+    gene_map = genes.with_row_count('gene_idx')
+
+    # Join mappings to the long dataframe
+    matrix_df = long_df.join(cell_map, on=['Sample', 'Cell Barcode'], how='left')
+    matrix_df = matrix_df.join(gene_map, on='Ensembl Id', how='left')
+
+    # Extract data for sparse matrix construction
+    row_ind = matrix_df['cell_idx'].to_numpy()
+    col_ind = matrix_df['gene_idx'].to_numpy()
+    data = matrix_df['Raw gene expression'].to_numpy()
+
+    # Create a sparse matrix in COO format and convert to CSR for efficiency
+    sparse_matrix = scipy.sparse.coo_matrix(
+        (data, (row_ind, col_ind)),
+        shape=(len(cells), len(genes))
+    ).tocsr()
+
+    # Create the obs and var dataframes for AnnData
+    obs = cells.to_pandas()
+    var = genes.to_pandas().set_index('Ensembl Id')
+
+    adata = ad.AnnData(X=sparse_matrix, obs=obs, var=var)
     adata.obs[cluster_column] = adata.obs[cluster_column].astype('category')
     adata.var_names = adata.var_names.astype(str)
     sc.pp.normalize_total(adata, target_sum=1e4)
