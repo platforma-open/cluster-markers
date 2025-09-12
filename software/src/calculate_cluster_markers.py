@@ -1,3 +1,4 @@
+import polars as pl
 import pandas as pd
 import scanpy as sc
 import anndata as ad
@@ -14,18 +15,18 @@ warnings.filterwarnings("ignore", message=".*fragmented.*", module="scanpy")
 warnings.filterwarnings("ignore", message="Transforming to str index", category=UserWarning)
 
 def load_data(counts_file, clusters_file, cluster_column):
-    counts_df = pd.read_csv(counts_file)
-    clusters_df = pd.read_csv(clusters_file)
+    counts_df = pl.read_csv(counts_file)
+    clusters_df = pl.read_csv(clusters_file)
 
     # Normalize minimal expected headers
-    counts_df.columns = [c.strip() for c in counts_df.columns]
-    clusters_df.columns = [c.strip() for c in clusters_df.columns]
+    counts_df = counts_df.rename({c: c.strip() for c in counts_df.columns})
+    clusters_df = clusters_df.rename({c: c.strip() for c in clusters_df.columns})
 
     # Map 'Cell ID' -> 'Cell Barcode' (contract: headers are 'Sample' and 'Cell ID')
     if "Cell Barcode" not in counts_df.columns and "Cell ID" in counts_df.columns:
-        counts_df = counts_df.rename(columns={"Cell ID": "Cell Barcode"})
+        counts_df = counts_df.rename({"Cell ID": "Cell Barcode"})
     if "Cell Barcode" not in clusters_df.columns and "Cell ID" in clusters_df.columns:
-        clusters_df = clusters_df.rename(columns={"Cell ID": "Cell Barcode"})
+        clusters_df = clusters_df.rename({"Cell ID": "Cell Barcode"})
 
     # Validate required headers
     required_counts = {"Sample", "Cell Barcode", "Ensembl Id", "Raw gene expression"}
@@ -38,26 +39,49 @@ def load_data(counts_file, clusters_file, cluster_column):
     if missing_clusters:
         raise KeyError(f"Clusters CSV missing columns: {missing_clusters}. Found: {list(clusters_df.columns)}")
 
-    # Pivot counts into wide matrix [Sample, Cell Barcode] x Genes
-    counts_matrix = counts_df.pivot_table(
-        index=['Sample', 'Cell Barcode'],
-        columns='Ensembl Id',
-        values='Raw gene expression',
-        fill_value=0,
-    )
-
-    # Merge cluster assignments
-    merged_df = counts_matrix.merge(
-        clusters_df[['Sample', 'Cell Barcode', cluster_column]],
-        on=['Sample', 'Cell Barcode']
+    # Join cluster assignments into long-format counts data
+    merged_df = counts_df.join(
+        clusters_df.select(['Sample', 'Cell Barcode', cluster_column]),
+        on=['Sample', 'Cell Barcode'],
+        how='left'
     )
     return merged_df, cluster_column
 
-def create_anndata(merged_df, cluster_column):
-    X = merged_df.drop(columns=['Sample', 'Cell Barcode', cluster_column]).values
-    obs = merged_df[['Sample', 'Cell Barcode', cluster_column]].copy()
-    var = pd.DataFrame(index=merged_df.drop(columns=['Sample', 'Cell Barcode', cluster_column]).columns)
-    adata = ad.AnnData(X=X, obs=obs, var=var)
+def create_anndata(long_df, cluster_column):
+    import scipy.sparse
+
+    # Create unique cell and gene identifiers
+    cells = long_df.select(['Sample', 'Cell Barcode', cluster_column]).unique(
+        subset=['Sample', 'Cell Barcode'],
+        keep='first',
+        maintain_order=True
+    )
+    genes = long_df.select('Ensembl Id').unique(maintain_order=True)
+
+    # Create integer mappings for cells and genes
+    cell_map = cells.with_row_count('cell_idx').select(['Sample', 'Cell Barcode', 'cell_idx'])
+    gene_map = genes.with_row_count('gene_idx')
+
+    # Join mappings to the long dataframe
+    matrix_df = long_df.join(cell_map, on=['Sample', 'Cell Barcode'], how='left')
+    matrix_df = matrix_df.join(gene_map, on='Ensembl Id', how='left')
+
+    # Extract data for sparse matrix construction
+    row_ind = matrix_df['cell_idx'].to_numpy()
+    col_ind = matrix_df['gene_idx'].to_numpy()
+    data = matrix_df['Raw gene expression'].to_numpy()
+
+    # Create a sparse matrix in COO format and convert to CSR for efficiency
+    sparse_matrix = scipy.sparse.coo_matrix(
+        (data, (row_ind, col_ind)),
+        shape=(len(cells), len(genes))
+    ).tocsr()
+
+    # Create the obs and var dataframes for AnnData
+    obs = cells.to_pandas()
+    var = genes.to_pandas().set_index('Ensembl Id')
+
+    adata = ad.AnnData(X=sparse_matrix, obs=obs, var=var)
     adata.obs[cluster_column] = adata.obs[cluster_column].astype('category')
     adata.var_names = adata.var_names.astype(str)
     sc.pp.normalize_total(adata, target_sum=1e4)
@@ -66,95 +90,112 @@ def create_anndata(merged_df, cluster_column):
 
 def find_markers(adata, cluster_column, strict_overlap, logfc_cutoff, pval_cutoff):
     sc.tl.rank_genes_groups(adata, groupby=cluster_column, method='wilcoxon')
+
+    # This is a fix for some scanpy versions that could return a mix of types
     adata.uns['rank_genes_groups'] = {
         k: (v.copy() if isinstance(v, pd.DataFrame) else v)
         for k, v in adata.uns['rank_genes_groups'].items()
     }
 
     markers_df = sc.get.rank_genes_groups_df(adata, group=None)
-    markers_df = markers_df.rename(columns={
+    markers_df = pl.from_pandas(markers_df).rename({
         "names": "Ensembl Id",
         "logfoldchanges": "Log2FC",
         "pvals_adj": "Adjusted p-value"
     })
 
-    bin_expr = pd.DataFrame(adata.X > 0, columns=adata.var_names, index=adata.obs.index)
-    bin_expr[cluster_column] = adata.obs[cluster_column].values
-    expr_pct = bin_expr.groupby(cluster_column).mean().T * 100
-    expr_pct.columns = expr_pct.columns.astype(str)
+    # Calculate percentage of cells expressing each gene per cluster
+    bin_expr_df = pl.DataFrame(
+        (adata.X > 0).toarray() if hasattr(adata.X, "toarray") else (adata.X > 0),
+        schema=adata.var_names.to_list()
+    ).with_columns(
+        pl.Series(name=cluster_column, values=adata.obs[cluster_column].values.astype(str))
+    )
+    expr_pct = bin_expr_df.group_by(cluster_column).mean()
+    expr_pct_long = expr_pct.melt(id_vars=cluster_column, variable_name="Ensembl Id", value_name="Percentage cells")
+    expr_pct_long = expr_pct_long.with_columns((pl.col("Percentage cells") * 100))
 
-    mean_expr = pd.DataFrame(adata.X, columns=adata.var_names, index=adata.obs.index)
-    mean_expr[cluster_column] = adata.obs[cluster_column].values
-    expr_mean = mean_expr.groupby(cluster_column).mean().T
-    expr_mean.columns = expr_mean.columns.astype(str)
+    # Calculate mean expression of each gene per cluster
+    mean_expr_df = pl.DataFrame(
+        adata.X.toarray() if hasattr(adata.X, "toarray") else adata.X,
+        schema=adata.var_names.to_list()
+    ).with_columns(
+        pl.Series(name=cluster_column, values=adata.obs[cluster_column].values.astype(str))
+    )
+    expr_mean = mean_expr_df.group_by(cluster_column).mean()
+    expr_mean_long = expr_mean.melt(id_vars=cluster_column, variable_name="Ensembl Id", value_name="Mean expression")
 
-    markers_df = markers_df[(markers_df['Log2FC'] >= logfc_cutoff) & (markers_df['Adjusted p-value'] <= pval_cutoff)]
+    markers_df = markers_df.filter(
+        (pl.col('Log2FC') >= logfc_cutoff) & (pl.col('Adjusted p-value') <= pval_cutoff)
+    )
 
-    filtered = []
-    for _, row in markers_df.iterrows():
-        gene = row['Ensembl Id']
-        cluster = row['group']
-        if isinstance(cluster, (int, float)):
-            cluster = str(int(cluster))
+    markers_df = markers_df.with_columns(pl.col("group").cast(pl.Utf8))
 
-        try:
-            pct_in_cluster = expr_pct.loc[gene, cluster]
-            mean_in_cluster = expr_mean.loc[gene, cluster]
-            pct_other_clusters = expr_pct.loc[gene, expr_pct.columns != cluster].max()
+    # Join with expression percentages and means
+    markers_df = markers_df.join(
+        expr_pct_long,
+        left_on=['Ensembl Id', 'group'],
+        right_on=['Ensembl Id', cluster_column],
+        how='left'
+    ).join(
+        expr_mean_long,
+        left_on=['Ensembl Id', 'group'],
+        right_on=['Ensembl Id', cluster_column],
+        how='left'
+    )
 
-            if pct_in_cluster >= 20:
-                if strict_overlap:
-                    if pct_other_clusters < 20:
-                        filtered.append({
-                            "Cluster": cluster,
-                            "Ensembl Id": gene,
-                            "Log2FC": row['Log2FC'],
-                            "Adjusted p-value": row['Adjusted p-value'],
-                            "Percentage cells": pct_in_cluster,
-                            "Mean expression": mean_in_cluster
-                        })
-                else:
-                    filtered.append({
-                        "Cluster": cluster,
-                        "Ensembl Id": gene,
-                        "Log2FC": row['Log2FC'],
-                        "Adjusted p-value": row['Adjusted p-value'],
-                        "Percentage cells": pct_in_cluster,
-                        "Mean expression": mean_in_cluster
-                    })
+    # Calculate max percentage in other clusters
+    other_pct = markers_df.join(
+        expr_pct_long, on='Ensembl Id'
+    ).filter(
+        pl.col('group') != pl.col(cluster_column)
+    ).group_by(['Ensembl Id', 'group']).agg(
+        pl.max('Percentage cells').alias('pct_other_clusters')
+    )
 
-        except KeyError:
-            print(f"⚠️ Gene {gene} or cluster {cluster} not found in expression matrix")
-            continue
+    markers_df = markers_df.join(other_pct, on=['Ensembl Id', 'group'], how='left').with_columns(
+        pl.col('pct_other_clusters').fill_null(0)
+    )
 
-    print(f"🔬 Markers after filtering: {len(filtered)} / {len(markers_df)}")
-    markers_df = pd.DataFrame(filtered)
+    # Apply filters
+    filtered_markers = markers_df.filter(pl.col('Percentage cells') >= 20)
+    if strict_overlap:
+        filtered_markers = filtered_markers.filter(pl.col('pct_other_clusters') < 20)
 
-    if len(markers_df) == 0:
-        return pd.DataFrame()
+    print(f"🔬 Markers after filtering: {len(filtered_markers)} / {len(markers_df)}")
+    
+    if filtered_markers.is_empty():
+        return pl.DataFrame()
 
-    return markers_df
+    return filtered_markers.select([
+        pl.col("group").alias("Cluster"),
+        "Ensembl Id",
+        "Log2FC",
+        "Adjusted p-value",
+        "Percentage cells",
+        "Mean expression"
+    ])
 
 def save_results(markers_df, cluster_column, output_all, output_top, top_n):
-    markers_df.to_csv(output_all, index=False)
-    top_df = markers_df.groupby('Cluster', observed=False).head(top_n)
-    top_df.to_csv(output_top, index=False)
+    markers_df.write_csv(output_all)
+    top_df = markers_df.group_by('Cluster', maintain_order=True).head(top_n)
+    top_df.write_csv(output_top)
 
 # Save DEG list for functional analysis block
 def save_deg_df(markers_df, logfc_cutoff):
-
-    markers_df["Regulation"] = np.where(
-        (markers_df["Log2FC"] > logfc_cutoff), "Up",
-        np.where(
-            (markers_df["Log2FC"] < -logfc_cutoff), "Down",
-            "NS"
+    deg_df = markers_df.with_columns(
+        pl.when(pl.col("Log2FC") > logfc_cutoff)
+        .then(pl.lit("Up"))
+        .otherwise(
+            pl.when(pl.col("Log2FC") < -logfc_cutoff)
+            .then(pl.lit("Down"))
+            .otherwise(pl.lit("NS"))
         )
-    )
-
-    deg_df = markers_df[["Cluster", "Ensembl Id", "Log2FC", "Regulation"]].copy()
+        .alias("Regulation")
+    ).select(["Cluster", "Ensembl Id", "Log2FC", "Regulation"])
 
     # Save DEG as CSV
-    deg_df.to_csv("DEG.csv", index=False)
+    deg_df.write_csv("DEG.csv")
 
 def main():
     parser = argparse.ArgumentParser(description='Find cluster markers from single-cell RNA-seq data.')
@@ -180,7 +221,7 @@ def main():
         pval_cutoff=args.pval_cutoff
     )
 
-    if markers_df is None or markers_df.empty:
+    if markers_df is None or markers_df.is_empty():
         print("⚠️ No markers passed filtering. No files written.")
     else:
         save_results(markers_df, cluster_column, args.output_all, args.output_top, args.top_n)
