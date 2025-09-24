@@ -27,10 +27,11 @@ wf.prepare(func(args){
 		name: "pl7.app/rna-seq/countMatrix",
 		domain: {
 			"pl7.app/rna-seq/normalized": "false"
-		},
-		annotations: {
-			"pl7.app/hideDataFromGraphs": "true"
 		}
+		// ,
+		// annotations: {
+		// 	"pl7.app/hideDataFromGraphs": "true"
+		// }
 	}, "countMatrices")
 	
 	return {
