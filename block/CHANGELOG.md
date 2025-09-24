@@ -1,5 +1,12 @@
 # @platforma-open/milaboratories.cluster-markers
 
+## 1.2.13
+
+### Patch Changes
+
+- Updated dependencies [c89e0d9]
+  - @platforma-open/milaboratories.cluster-markers.workflow@1.8.5
+
 ## 1.2.12
 
 ### Patch Changes

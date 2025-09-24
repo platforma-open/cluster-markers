@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.8.5
+
+### Patch Changes
+
+- c89e0d9: Support latest Cell Ranger version
+
 ## 1.8.4
 
 ### Patch Changes
