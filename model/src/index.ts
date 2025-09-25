@@ -75,10 +75,12 @@ export const model = BlockModel.create()
     tableState: createPlDataTableStateV2(),
   })
 
+  // Allow inputs from any single-cell grouping block
   .output('clusterAnnotationOptions', (ctx) =>
     ctx.resultPool.getOptions((spec) => isPColumnSpec(spec)
-      && spec.name === 'pl7.app/rna-seq/leidencluster'
-    , { includeNativeLabel: false, addLabelAsSuffix: true }),
+      && (spec.name === 'pl7.app/rna-seq/leidencluster'
+        || spec.name === 'pl7.app/rna-seq/cellType')
+    , { includeNativeLabel: true, addLabelAsSuffix: true }),
   )
 
   .output('clusterMarkersPt', (ctx) => {

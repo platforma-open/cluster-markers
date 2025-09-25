@@ -65,7 +65,13 @@ def create_anndata(merged_df, cluster_column):
     return adata
 
 def find_markers(adata, cluster_column, strict_overlap, logfc_cutoff, pval_cutoff):
-    sc.tl.rank_genes_groups(adata, groupby=cluster_column, method='wilcoxon')
+    # analysis is only performed on clusters with sufficient data
+    cluster_counts = adata.obs[cluster_column].value_counts()
+    groups_with_multiple_cells = cluster_counts[cluster_counts > 1].index.tolist()
+    if not groups_with_multiple_cells:
+        print("No clusters with more than one cell found, skipping marker analysis.")
+        return pd.DataFrame()
+    sc.tl.rank_genes_groups(adata, groupby=cluster_column, method='wilcoxon', groups=groups_with_multiple_cells)
     adata.uns['rank_genes_groups'] = {
         k: (v.copy() if isinstance(v, pd.DataFrame) else v)
         for k, v in adata.uns['rank_genes_groups'].items()
@@ -80,12 +86,12 @@ def find_markers(adata, cluster_column, strict_overlap, logfc_cutoff, pval_cutof
 
     bin_expr = pd.DataFrame(adata.X > 0, columns=adata.var_names, index=adata.obs.index)
     bin_expr[cluster_column] = adata.obs[cluster_column].values
-    expr_pct = bin_expr.groupby(cluster_column).mean().T * 100
+    expr_pct = bin_expr.groupby(cluster_column, observed=False).mean().T * 100
     expr_pct.columns = expr_pct.columns.astype(str)
 
     mean_expr = pd.DataFrame(adata.X, columns=adata.var_names, index=adata.obs.index)
     mean_expr[cluster_column] = adata.obs[cluster_column].values
-    expr_mean = mean_expr.groupby(cluster_column).mean().T
+    expr_mean = mean_expr.groupby(cluster_column, observed=False).mean().T
     expr_mean.columns = expr_mean.columns.astype(str)
 
     markers_df = markers_df[(markers_df['Log2FC'] >= logfc_cutoff) & (markers_df['Adjusted p-value'] <= pval_cutoff)]
