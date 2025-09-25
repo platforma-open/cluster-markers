@@ -1,5 +1,12 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.8.6
+
+### Patch Changes
+
+- Updated dependencies [bae60fb]
+  - @platforma-open/milaboratories.cluster-markers.software@1.6.4
+
 ## 1.8.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.6.4
+
+### Patch Changes
+
+- bae60fb: Support any cell group, not only leiden clusters
+
 ## 1.6.3
 
 ### Patch Changes
