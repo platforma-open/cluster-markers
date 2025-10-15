@@ -1,5 +1,14 @@
 # @platforma-open/milaboratories.cluster-markers.model
 
+## 1.4.4
+
+### Patch Changes
+
+- 8b7a188: technical release
+- 99978bc: technical release
+- 84bb66a: technical release
+- 89db503: technical release
+
 ## 1.4.3
 
 ### Patch Changes

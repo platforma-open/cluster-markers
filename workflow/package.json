@@ -1,6 +1,6 @@
 {
   "name": "@platforma-open/milaboratories.cluster-markers.workflow",
-  "version": "1.8.6",
+  "version": "1.8.7",
   "type": "module",
   "description": "Block Workflow",
   "scripts": {

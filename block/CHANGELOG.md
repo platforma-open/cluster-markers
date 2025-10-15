@@ -1,5 +1,21 @@
 # @platforma-open/milaboratories.cluster-markers
 
+## 1.2.15
+
+### Patch Changes
+
+- 8b7a188: technical release
+- 99978bc: technical release
+- 84bb66a: technical release
+- 89db503: technical release
+- Updated dependencies [8b7a188]
+- Updated dependencies [99978bc]
+- Updated dependencies [84bb66a]
+- Updated dependencies [89db503]
+  - @platforma-open/milaboratories.cluster-markers.model@1.4.4
+  - @platforma-open/milaboratories.cluster-markers.ui@1.5.5
+  - @platforma-open/milaboratories.cluster-markers.workflow@1.8.7
+
 ## 1.2.14
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.6.5
+
+### Patch Changes
+
+- 8b7a188: technical release
+- 99978bc: technical release
+- 84bb66a: technical release
+- 89db503: technical release
+
 ## 1.6.4
 
 ### Patch Changes
