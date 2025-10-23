@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.8.8
+
+### Patch Changes
+
+- b6336c2: Make it work with import-sc data
+
 ## 1.8.7
 
 ### Patch Changes
