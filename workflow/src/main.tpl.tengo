@@ -62,7 +62,9 @@ wf.body(func(args) {
 	// Extract Cell Ranger block ID from trace
 	cellRangerBlockId := undefined
 	for step in clusterTrace {
-		if !is_undefined(step) && !is_undefined(step.type) && step.type == "milaboratories.cell-ranger" {
+		if !is_undefined(step) && !is_undefined(step.type) && 
+			(step.type == "milaboratories.cell-ranger" || 
+				step.type == "milaboratories.import-sc-rnaseq-data") {
 			if !is_undefined(step.id) {
 				cellRangerBlockId = step.id
 				break
