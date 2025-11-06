@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.8.9
+
+### Patch Changes
+
+- 78aa7aa: Update to Parquet
+
 ## 1.8.8
 
 ### Patch Changes
