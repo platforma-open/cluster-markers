@@ -38,6 +38,7 @@ self.body(func(args) {
         saveFile("cluster_markers.csv").
         saveFile("top_markers.csv").
         saveFile("DEG.csv").
+        printErrStreamToStdout().
         cache(24 * 60 * 60 * 1000).
         run()
 
