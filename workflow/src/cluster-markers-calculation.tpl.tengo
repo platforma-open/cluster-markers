@@ -1,0 +1,56 @@
+self := import("@platforma-sdk/workflow-tengo:tpl")
+exec := import("@platforma-sdk/workflow-tengo:exec")
+assets := import("@platforma-sdk/workflow-tengo:assets")
+
+self.defineOutputs("clusterMarkersCsv", "topMarkersCsv", "degCsv")
+
+self.body(func(args) {
+    // Input parameters
+    csvCounts := args.csvCounts
+    csvClusters := args.csvClusters
+    clusterColumn := args.clusterColumn
+    topN := args.topN
+    logfcCutoff := args.logfcCutoff
+    pvalCutoff := args.pvalCutoff
+    strictOverlap := args.strictOverlap
+    mem := args.mem
+    cpu := args.cpu
+
+    // Cluster markers software execution
+    clusterMarkers := exec.builder().
+        software(assets.importSoftware("@platforma-open/milaboratories.cluster-markers.software:calculate-clusterMarkers")).
+        mem(mem).
+        cpu(cpu).
+        addFile("rawCounts.csv", csvCounts).
+        addFile("clusters.csv", csvClusters).
+        arg("--counts").arg("rawCounts.csv").
+        arg("--clusters").arg("clusters.csv").
+        arg("--cluster_column").arg(string(clusterColumn)).
+        arg("--top_n").arg(string(topN)).
+        arg("--logfc_cutoff").arg(string(logfcCutoff)).
+        arg("--pval_cutoff").arg(string(pvalCutoff))
+
+    if strictOverlap {
+        clusterMarkers = clusterMarkers.arg("--so")
+    }
+
+    clusterMarkers = clusterMarkers.
+        saveFile("cluster_markers.csv").
+        saveFile("top_markers.csv").
+        saveFile("DEG.csv").
+        printErrStreamToStdout().
+        cache(24 * 60 * 60 * 1000).
+        run()
+
+    // Get result files
+    clusterMarkersCsv := clusterMarkers.getFile("cluster_markers.csv")
+    topMarkersCsv := clusterMarkers.getFile("top_markers.csv")
+    degCsv := clusterMarkers.getFile("DEG.csv")
+
+    return {
+        clusterMarkersCsv: clusterMarkersCsv,
+        topMarkersCsv: topMarkersCsv,
+        degCsv: degCsv
+    }
+})
+

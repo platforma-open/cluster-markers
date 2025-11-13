@@ -133,6 +133,6 @@ export const model = BlockModel.create()
       : 'Cluster Markers',
   )
 
-  .done();
+  .done(2);
 
 export type BlockOutputs = InferOutputsType<typeof model>;

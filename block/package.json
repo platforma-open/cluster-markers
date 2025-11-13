@@ -25,10 +25,10 @@
     "meta": {
       "title": "Cluster Markers",
       "logo": "file:../logos/block-logo.png",
-      "url": "https://github.com/milaboratory/platforma-cluster-markers",
-      "docs": "https://github.com/milaboratory/platforma-cluster-markers/docs",
+      "url": "https://github.com/platforma-open/cluster-markers",
+      "docs": "https://docs.platforma.bio/guides/sc-rna-seq-analysis/clusters-markers/",
       "support": "mailto:support@milaboratories.com",
-      "description": "Identification of cluster marker genes.",
+      "description": "Identifies marker genes distinguishing cell clusters using Wilcoxon rank-sum test.",
       "longDescription": "file:../docs/description.md",
       "changelog": "file:../CHANGELOG.md",
       "tags": [
