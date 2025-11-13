@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.9.0
+
+### Minor Changes
+
+- d2368a9: Enable block deduplication and update metadata.
+
 ## 1.8.9
 
 ### Patch Changes

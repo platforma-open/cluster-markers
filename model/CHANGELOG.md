@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.model
 
+## 1.5.0
+
+### Minor Changes
+
+- d2368a9: Enable block deduplication and update metadata.
+
 ## 1.4.4
 
 ### Patch Changes
