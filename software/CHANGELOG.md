@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.software
 
+## 1.6.6
+
+### Patch Changes
+
+- 8ee5a70: Improve performance
+
 ## 1.6.5
 
 ### Patch Changes

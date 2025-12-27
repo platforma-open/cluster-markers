@@ -1,6 +1,6 @@
 {
   "name": "@platforma-open/milaboratories.cluster-markers.software",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "scripts": {
     "build": "pl-pkg build",
     "prepublishOnly": "pl-pkg prepublish",
