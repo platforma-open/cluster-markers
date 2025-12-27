@@ -139,7 +139,7 @@ def find_markers(adata, cluster_column, strict_overlap, logfc_cutoff, pval_cutof
 
     log_message(f"Finding markers for {len(groups_with_multiple_cells)} clusters using Wilcoxon test", "STEP")
     sc.tl.rank_genes_groups(adata, groupby=cluster_column, method='wilcoxon', groups=groups_with_multiple_cells)
-    # To be restored in case we want to sport the adata at one point
+    # To be restored in case we want to sort the adata at one point
     # adata.uns['rank_genes_groups'] = {
     #     k: (v.copy() if isinstance(v, pd.DataFrame) else v)
     #     for k, v in adata.uns['rank_genes_groups'].items()
@@ -163,7 +163,6 @@ def find_markers(adata, cluster_column, strict_overlap, logfc_cutoff, pval_cutof
     if len(markers_df) == 0:
         return pd.DataFrame()
 
-    filtered = []
     # pre-calculate row indices for each cluster
     cluster_indices = {c: np.where(adata.obs[cluster_column] == c)[0] for c in adata.obs[cluster_column].unique() if pd.notna(c)}
     
