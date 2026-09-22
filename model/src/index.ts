@@ -1,79 +1,58 @@
-import type { GraphMakerState } from "@milaboratories/graph-maker";
-import type {
-  InferOutputsType,
-  PFrameHandle,
-  PlDataTableStateV2,
-  PlRef,
-} from "@platforma-sdk/model";
+import { kind } from "@platforma-open/milaboratories.cluster-markers.kind";
+import type { InferOutputsType, PFrameHandle } from "@platforma-sdk/model";
 import {
-  BlockModel,
+  BlockModelV3,
   createPFrameForGraphs,
   createPlDataTableSheet,
-  createPlDataTableStateV2,
   createPlDataTableV2,
   getUniquePartitionKeys,
   isPColumnSpec,
 } from "@platforma-sdk/model";
+import { blockDataModel } from "./dataModel";
+import type { BlockArgs } from "./types";
 
-export type UiState = {
-  graphStateBubble: GraphMakerState;
-  graphStateUMAP: GraphMakerState;
-  graphStateTSNE: GraphMakerState;
-  tableState: PlDataTableStateV2;
-};
+export { blockDataModel } from "./dataModel";
+export type { BlockArgs, BlockData, BlockUiState } from "./types";
 
-export type BlockArgs = {
-  clusterAnnotationRef?: PlRef;
-  title?: string;
-  topN: number;
-  logfcCutoff: number;
-  pvalCutoff: number;
-  strictOverlap: boolean;
-};
+export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind })
 
-export const model = BlockModel.create()
+  // The run gate. Throwing surfaces the reason in the UI, which a disabled Run
+  // button would not. Replaces V1's `.argsValid`, so validation cannot drift
+  // from the projection any more.
+  .args<BlockArgs>((data): BlockArgs => {
+    const {
+      graphStateBubble: _graphStateBubble,
+      graphStateUMAP: _graphStateUMAP,
+      graphStateTSNE: _graphStateTSNE,
+      tableState: _tableState,
+      ...args
+    } = data;
 
-  .withArgs<BlockArgs>({
-    topN: 3,
-    logfcCutoff: 1.0,
-    pvalCutoff: 0.01,
-    strictOverlap: false,
-  })
-
-  .argsValid((ctx) => {
-    // Check if cluster annotation is selected
-    if (!ctx.args.clusterAnnotationRef) {
-      return false;
+    if (args.clusterAnnotationRef === undefined) {
+      throw new Error("Cluster annotation is required");
+    }
+    if (!args.topN || args.topN < 1) {
+      throw new Error("Top markers per cluster must be at least 1");
     }
 
-    // Check if topN is a valid positive number
-    if (!ctx.args.topN || ctx.args.topN < 1) {
-      return false;
-    }
-
-    return true;
+    // Nothing is canonicalized here on purpose: these keys are what the V1
+    // workflow already read, and the workflow still supplies its own defaults
+    // for the two cutoffs a user can clear. Substituting them here would
+    // change the args bytes of every project that has one cleared, and stale
+    // it for no gain.
+    return args;
   })
 
-  .withUiState<UiState>({
-    graphStateBubble: {
-      title: "Dotplot",
-      template: "bubble",
-      layersSettings: {
-        bubble: {
-          normalizationDirection: null,
-        },
-      },
-    },
-    graphStateUMAP: {
-      title: "UMAP",
-      template: "dots",
-    },
-    graphStateTSNE: {
-      title: "tSNE",
-      template: "dots",
-    },
-    tableState: createPlDataTableStateV2(),
-  })
+  // Inverse of the kind's init-params contract: the five settings a user picks
+  // by hand. `title` is left out — nothing writes it, so there is nothing to
+  // carry into a template.
+  .templateParams((data) => ({
+    clusterAnnotationRef: data.clusterAnnotationRef,
+    topN: data.topN,
+    logfcCutoff: data.logfcCutoff,
+    pvalCutoff: data.pvalCutoff,
+    strictOverlap: data.strictOverlap,
+  }))
 
   // Allow inputs from any single-cell grouping block
   .output("clusterAnnotationOptions", (ctx) =>
@@ -85,13 +64,16 @@ export const model = BlockModel.create()
     ),
   )
 
-  .output("clusterMarkersPt", (ctx) => {
+  // `withStatus` on the next three: PlAgDataTableV2 (via usePlDataTableSettingsV2)
+  // and GraphMaker both take the status-wrapped output, and render the pending
+  // and error states from it themselves.
+  .outputWithStatus("clusterMarkersPt", (ctx) => {
     const pCols = ctx.outputs?.resolve("clusterMarkersPf")?.getPColumns();
     if (pCols === undefined) {
       return undefined;
     }
 
-    return createPlDataTableV2(ctx, pCols, ctx.uiState.tableState);
+    return createPlDataTableV2(ctx, pCols, ctx.data.tableState);
   })
 
   .output("clusterMarkersSheets", (ctx) => {
@@ -109,7 +91,7 @@ export const model = BlockModel.create()
     return r.map((values, i) => createPlDataTableSheet(ctx, anchor.spec.axesSpec[i], values));
   })
 
-  .output("clusterMarkersTopPf", (ctx): PFrameHandle | undefined => {
+  .outputWithStatus("clusterMarkersTopPf", (ctx): PFrameHandle | undefined => {
     const pCols = ctx.outputs?.resolve("clusterMarkersTopPf")?.getPColumns();
     if (pCols === undefined) {
       return undefined;
@@ -117,7 +99,7 @@ export const model = BlockModel.create()
     return createPFrameForGraphs(ctx, pCols);
   })
 
-  .output("umapPf", (ctx): PFrameHandle | undefined => {
+  .outputWithStatus("umapPf", (ctx): PFrameHandle | undefined => {
     return createPFrameForGraphs(ctx);
   })
 
@@ -129,8 +111,8 @@ export const model = BlockModel.create()
     { type: "link", href: "/dotplot", label: "Dotplot" },
   ])
 
-  .title((ctx) => (ctx.args.title ? `Cluster Markers - ${ctx.args.title}` : "Cluster Markers"))
+  .title((ctx) => (ctx.data.title ? `Cluster Markers - ${ctx.data.title}` : "Cluster Markers"))
 
-  .done(2);
+  .done();
 
-export type BlockOutputs = InferOutputsType<typeof model>;
+export type BlockOutputs = InferOutputsType<typeof platforma>;

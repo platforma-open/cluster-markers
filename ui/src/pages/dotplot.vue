@@ -1,21 +1,11 @@
 <script setup lang="ts">
-import "@milaboratories/graph-maker/styles";
 import { PlBlockPage } from "@platforma-sdk/ui-vue";
 import { useApp } from "../app";
 
 import { GraphMaker } from "@milaboratories/graph-maker";
 import type { PredefinedGraphOption } from "@milaboratories/graph-maker";
-import { watch } from "vue";
 
 const app = useApp();
-
-watch(
-  () => app.model.ui,
-  async (value) => {
-    console.log(value, "app.model.ui.graphStateBubble");
-  },
-  { immediate: true },
-);
 
 const defaultOptions: PredefinedGraphOption<"bubble">[] = [
   {
@@ -74,7 +64,7 @@ const defaultOptions: PredefinedGraphOption<"bubble">[] = [
 <template>
   <PlBlockPage>
     <GraphMaker
-      v-model="app.model.ui.graphStateBubble"
+      v-model="app.model.data.graphStateBubble"
       chartType="bubble"
       :p-frame="app.model.outputs.clusterMarkersTopPf"
       :default-options="defaultOptions"

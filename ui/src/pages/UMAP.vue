@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import "@milaboratories/graph-maker/styles";
 import { PlBlockPage } from "@platforma-sdk/ui-vue";
 import { useApp } from "../app";
 
@@ -69,7 +68,7 @@ const defaultOptions: PredefinedGraphOption<"scatterplot-umap">[] = [
 <template>
   <PlBlockPage>
     <GraphMaker
-      v-model="app.model.ui.graphStateUMAP"
+      v-model="app.model.data.graphStateUMAP"
       chartType="scatterplot-umap"
       :p-frame="app.model.outputs.umapPf"
       :default-options="defaultOptions"

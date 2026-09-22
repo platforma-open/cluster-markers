@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import "@milaboratories/graph-maker/styles";
 import {
   PlAgDataTableV2,
   PlAlert,
@@ -31,7 +30,7 @@ const overlapOptions = [
 const data = reactive<{
   settingsOpen: boolean;
 }>({
-  settingsOpen: app.model.args.clusterAnnotationRef === undefined,
+  settingsOpen: app.model.data.clusterAnnotationRef === undefined,
 });
 </script>
 
@@ -47,14 +46,14 @@ const data = reactive<{
       </PlBtnGhost>
     </template>
     <PlAgDataTableV2
-      v-model="app.model.ui.tableState"
+      v-model="app.model.data.tableState"
       :settings="tableSettings"
       show-export-button
     />
     <PlSlideModal v-model="data.settingsOpen">
       <template #title>Settings</template>
       <PlDropdownRef
-        v-model="app.model.args.clusterAnnotationRef"
+        v-model="app.model.data.clusterAnnotationRef"
         :options="app.model.outputs.clusterAnnotationOptions"
         label="Cluster annotation"
         required
@@ -64,7 +63,7 @@ const data = reactive<{
         clearable
       />
       <PlNumberField
-        v-model="app.model.args.topN"
+        v-model="app.model.data.topN"
         label="Top markers per cluster"
         :minValue="1"
         :step="1"
@@ -88,7 +87,7 @@ const data = reactive<{
         </template>
       </PlNumberField>
       <PlBtnGroup
-        v-model="app.model.args.strictOverlap"
+        v-model="app.model.data.strictOverlap"
         label="Marker specificity mode"
         :options="overlapOptions"
       >
@@ -108,7 +107,7 @@ const data = reactive<{
       </PlBtnGroup>
       <PlRow>
         <PlNumberField
-          v-model="app.model.args.logfcCutoff"
+          v-model="app.model.data.logfcCutoff"
           label="Log2(FC)"
           :minValue="0"
           :step="0.1"
@@ -124,7 +123,7 @@ const data = reactive<{
           </template>
         </PlNumberField>
         <PlNumberField
-          v-model="app.model.args.pvalCutoff"
+          v-model="app.model.data.pvalCutoff"
           label="Adjusted p-value"
           :minValue="0"
           :maxValue="1"
@@ -141,12 +140,12 @@ const data = reactive<{
         </PlNumberField>
       </PlRow>
       <!-- Add warnings if selected threshold are out of most commonly used bounds -->
-      <PlAlert v-if="app.model.args.pvalCutoff > 0.05" type="warn">
+      <PlAlert v-if="app.model.data.pvalCutoff > 0.05" type="warn">
         {{
           "Warning: The selected adjusted p-value threshold is higher than the commonly recommended 0.05"
         }}
       </PlAlert>
-      <PlAlert v-if="app.model.args.logfcCutoff < 0.6" type="warn">
+      <PlAlert v-if="app.model.data.logfcCutoff < 0.6" type="warn">
         {{
           "Warning: The selected Log2(FC) threshold may be too low for identifying robust cluster markers"
         }}
