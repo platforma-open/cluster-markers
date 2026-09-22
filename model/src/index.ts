@@ -25,6 +25,7 @@ export const platforma = BlockModelV3.create({ dataModel: blockDataModel, kind }
       graphStateUMAP: _graphStateUMAP,
       graphStateTSNE: _graphStateTSNE,
       tableState: _tableState,
+      tableScope: _tableScope,
       ...args
     } = data;
 

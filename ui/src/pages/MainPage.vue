@@ -5,6 +5,7 @@ import {
   PlBlockPage,
   PlBtnGhost,
   PlBtnGroup,
+  PlDropdownLine,
   PlDropdownRef,
   PlMaskIcon24,
   PlNumberField,
@@ -12,15 +13,23 @@ import {
   PlSlideModal,
   usePlDataTableSettingsV2,
 } from "@platforma-sdk/ui-vue";
-import { useApp } from "../app";
 import { reactive } from "vue";
+import { useApp } from "../app";
 
 const app = useApp();
 
 const tableSettings = usePlDataTableSettingsV2({
   model: () => app.model.outputs.clusterMarkersPt,
-  sheets: () => app.model.outputs.clusterMarkersSheets,
+  // The sheet is what scopes the table — and therefore the Export button, which
+  // serializes the visible table handle. Dropping it puts every cluster in the
+  // table at once and turns the cluster axis into an ordinary column.
+  sheets: () => (app.model.data.tableScope === "all" ? [] : app.model.outputs.clusterMarkersSheets),
 });
+
+const tableScopeOptions = [
+  { text: "Per cluster", value: "cluster" as const },
+  { text: "All clusters", value: "all" as const },
+];
 
 const overlapOptions = [
   { text: "Non-exclusive", value: false },
@@ -49,7 +58,15 @@ const data = reactive<{
       v-model="app.model.data.tableState"
       :settings="tableSettings"
       show-export-button
-    />
+    >
+      <template #after-sheets>
+        <PlDropdownLine
+          v-model="app.model.data.tableScope"
+          :options="tableScopeOptions"
+          prefix="Show:"
+        />
+      </template>
+    </PlAgDataTableV2>
     <PlSlideModal v-model="data.settingsOpen">
       <template #title>Settings</template>
       <PlDropdownRef

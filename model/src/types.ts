@@ -19,6 +19,11 @@ export type BlockArgs = {
   strictOverlap: boolean;
 };
 
+/**
+ * Which slice of the marker table the Main page shows.
+ */
+export type TableScope = "cluster" | "all";
+
 /** The view state the workflow never sees. Read only by `.upgradeLegacy` under this name. */
 export type BlockUiState = {
   graphStateBubble: GraphMakerState;
@@ -28,7 +33,8 @@ export type BlockUiState = {
 };
 
 /**
- * Unified V3 data — the args above plus the four view states.
+ * Unified V3 data — the args above plus the view state: the four plot/table
+ * states and the scope the marker table is read at.
  *
  * The intersection is the honest shape here, not V1 in a V3 jacket. Every
  * settings-panel field is an analysis decision the user commits and then
@@ -37,4 +43,7 @@ export type BlockUiState = {
  * staleness gate, so there is no distortion to undo — the split that already
  * existed is the split V3 wants.
  */
-export type BlockData = BlockArgs & BlockUiState;
+export type BlockData = BlockArgs &
+  BlockUiState & {
+    tableScope: TableScope;
+  };

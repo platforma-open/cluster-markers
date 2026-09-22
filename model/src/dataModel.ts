@@ -9,6 +9,9 @@ export const blockDataModel = new DataModelBuilder({ kind })
   .upgradeLegacy<BlockArgs, BlockUiState>(({ args, uiState }) => ({
     ...args,
     ...uiState,
+    // Not on disk under V1 — the sheet was the only way to read the table, so
+    // that is what a migrated project keeps seeing.
+    tableScope: "cluster" as const,
   }))
   .init(({ params }) => ({
     clusterAnnotationRef: params?.clusterAnnotationRef,
@@ -16,6 +19,8 @@ export const blockDataModel = new DataModelBuilder({ kind })
     logfcCutoff: params?.logfcCutoff ?? 1.0,
     pvalCutoff: params?.pvalCutoff ?? 0.01,
     strictOverlap: params?.strictOverlap ?? false,
+
+    tableScope: "cluster" as const,
 
     graphStateBubble: {
       title: "Dotplot",
