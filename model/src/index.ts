@@ -1,10 +1,10 @@
-import type { GraphMakerState } from '@milaboratories/graph-maker';
+import type { GraphMakerState } from "@milaboratories/graph-maker";
 import type {
   InferOutputsType,
   PFrameHandle,
   PlDataTableStateV2,
   PlRef,
-} from '@platforma-sdk/model';
+} from "@platforma-sdk/model";
 import {
   BlockModel,
   createPFrameForGraphs,
@@ -13,7 +13,7 @@ import {
   createPlDataTableV2,
   getUniquePartitionKeys,
   isPColumnSpec,
-} from '@platforma-sdk/model';
+} from "@platforma-sdk/model";
 
 export type UiState = {
   graphStateBubble: GraphMakerState;
@@ -56,8 +56,8 @@ export const model = BlockModel.create()
 
   .withUiState<UiState>({
     graphStateBubble: {
-      title: 'Dotplot',
-      template: 'bubble',
+      title: "Dotplot",
+      template: "bubble",
       layersSettings: {
         bubble: {
           normalizationDirection: null,
@@ -65,26 +65,28 @@ export const model = BlockModel.create()
       },
     },
     graphStateUMAP: {
-      title: 'UMAP',
-      template: 'dots',
+      title: "UMAP",
+      template: "dots",
     },
     graphStateTSNE: {
-      title: 'tSNE',
-      template: 'dots',
+      title: "tSNE",
+      template: "dots",
     },
     tableState: createPlDataTableStateV2(),
   })
 
   // Allow inputs from any single-cell grouping block
-  .output('clusterAnnotationOptions', (ctx) =>
-    ctx.resultPool.getOptions((spec) => isPColumnSpec(spec)
-      && (spec.name === 'pl7.app/rna-seq/leidencluster'
-        || spec.name === 'pl7.app/rna-seq/cellType')
-    , { includeNativeLabel: true, addLabelAsSuffix: true }),
+  .output("clusterAnnotationOptions", (ctx) =>
+    ctx.resultPool.getOptions(
+      (spec) =>
+        isPColumnSpec(spec) &&
+        (spec.name === "pl7.app/rna-seq/leidencluster" || spec.name === "pl7.app/rna-seq/cellType"),
+      { includeNativeLabel: true, addLabelAsSuffix: true },
+    ),
   )
 
-  .output('clusterMarkersPt', (ctx) => {
-    const pCols = ctx.outputs?.resolve('clusterMarkersPf')?.getPColumns();
+  .output("clusterMarkersPt", (ctx) => {
+    const pCols = ctx.outputs?.resolve("clusterMarkersPf")?.getPColumns();
     if (pCols === undefined) {
       return undefined;
     }
@@ -92,8 +94,8 @@ export const model = BlockModel.create()
     return createPlDataTableV2(ctx, pCols, ctx.uiState.tableState);
   })
 
-  .output('clusterMarkersSheets', (ctx) => {
-    const pCols = ctx.outputs?.resolve('clusterMarkersPf')?.getPColumns();
+  .output("clusterMarkersSheets", (ctx) => {
+    const pCols = ctx.outputs?.resolve("clusterMarkersPf")?.getPColumns();
     if (pCols === undefined) {
       return undefined;
     }
@@ -107,31 +109,27 @@ export const model = BlockModel.create()
     return r.map((values, i) => createPlDataTableSheet(ctx, anchor.spec.axesSpec[i], values));
   })
 
-  .output('clusterMarkersTopPf', (ctx): PFrameHandle | undefined => {
-    const pCols = ctx.outputs?.resolve('clusterMarkersTopPf')?.getPColumns();
+  .output("clusterMarkersTopPf", (ctx): PFrameHandle | undefined => {
+    const pCols = ctx.outputs?.resolve("clusterMarkersTopPf")?.getPColumns();
     if (pCols === undefined) {
       return undefined;
     }
     return createPFrameForGraphs(ctx, pCols);
   })
 
-  .output('umapPf', (ctx): PFrameHandle | undefined => {
+  .output("umapPf", (ctx): PFrameHandle | undefined => {
     return createPFrameForGraphs(ctx);
   })
 
-  .output('isRunning', (ctx) => ctx.outputs?.getIsReadyOrError() === false)
+  .output("isRunning", (ctx) => ctx.outputs?.getIsReadyOrError() === false)
 
-  .sections((_ctx) => ([
-    { type: 'link', href: '/', label: 'Main' },
+  .sections((_ctx) => [
+    { type: "link", href: "/", label: "Main" },
     // { type: 'link', href: '/umap', label: 'UMAP' },
-    { type: 'link', href: '/dotplot', label: 'Dotplot' },
-  ]))
+    { type: "link", href: "/dotplot", label: "Dotplot" },
+  ])
 
-  .title((ctx) =>
-    ctx.args.title
-      ? `Cluster Markers - ${ctx.args.title}`
-      : 'Cluster Markers',
-  )
+  .title((ctx) => (ctx.args.title ? `Cluster Markers - ${ctx.args.title}` : "Cluster Markers"))
 
   .done(2);
 

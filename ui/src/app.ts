@@ -1,8 +1,8 @@
-import { model } from '@platforma-open/milaboratories.cluster-markers.model';
-import { defineApp } from '@platforma-sdk/ui-vue';
-import MainPage from './pages/MainPage.vue';
+import { model } from "@platforma-open/milaboratories.cluster-markers.model";
+import { defineApp } from "@platforma-sdk/ui-vue";
+import MainPage from "./pages/MainPage.vue";
 // import UMAP from './pages/UMAP.vue';
-import dotplot from './pages/dotplot.vue';
+import dotplot from "./pages/dotplot.vue";
 
 export const sdkPlugin = defineApp(model, (app) => {
   return {
@@ -10,9 +10,9 @@ export const sdkPlugin = defineApp(model, (app) => {
       return app.model.outputs.isRunning;
     },
     routes: {
-      '/': () => MainPage,
+      "/": () => MainPage,
       // '/umap': () => UMAP,
-      '/dotplot': () => dotplot,
+      "/dotplot": () => dotplot,
     },
   };
 });

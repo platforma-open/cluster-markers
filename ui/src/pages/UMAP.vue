@@ -1,70 +1,69 @@
 <script setup lang="ts">
-import '@milaboratories/graph-maker/styles';
-import { PlBlockPage } from '@platforma-sdk/ui-vue';
-import { useApp } from '../app';
+import "@milaboratories/graph-maker/styles";
+import { PlBlockPage } from "@platforma-sdk/ui-vue";
+import { useApp } from "../app";
 
-import type { PredefinedGraphOption } from '@milaboratories/graph-maker';
-import { GraphMaker } from '@milaboratories/graph-maker';
+import type { PredefinedGraphOption } from "@milaboratories/graph-maker";
+import { GraphMaker } from "@milaboratories/graph-maker";
 
 const app = useApp();
 
-const defaultOptions: PredefinedGraphOption<'scatterplot-umap'>[] = [
+const defaultOptions: PredefinedGraphOption<"scatterplot-umap">[] = [
   {
-    inputName: 'x',
+    inputName: "x",
     selectedSource: {
-      kind: 'PColumn',
-      name: 'pl7.app/rna-seq/umap1',
-      valueType: 'Double',
+      kind: "PColumn",
+      name: "pl7.app/rna-seq/umap1",
+      valueType: "Double",
       axesSpec: [
         {
-          name: 'pl7.app/sampleId',
-          type: 'String',
+          name: "pl7.app/sampleId",
+          type: "String",
         },
         {
-          name: 'pl7.app/cellId',
-          type: 'String',
+          name: "pl7.app/cellId",
+          type: "String",
         },
       ],
     },
   },
   {
-    inputName: 'y',
+    inputName: "y",
     selectedSource: {
-      kind: 'PColumn',
-      name: 'pl7.app/rna-seq/umap2',
-      valueType: 'Double',
+      kind: "PColumn",
+      name: "pl7.app/rna-seq/umap2",
+      valueType: "Double",
       axesSpec: [
         {
-          name: 'pl7.app/sampleId',
-          type: 'String',
+          name: "pl7.app/sampleId",
+          type: "String",
         },
         {
-          name: 'pl7.app/cellId',
-          type: 'String',
+          name: "pl7.app/cellId",
+          type: "String",
         },
       ],
     },
   },
   {
-    inputName: 'grouping',
+    inputName: "grouping",
     selectedSource: {
-      kind: 'PColumn',
-      name: 'pl7.app/rna-seq/leidencluster',
-      valueType: 'String',
+      kind: "PColumn",
+      name: "pl7.app/rna-seq/leidencluster",
+      valueType: "String",
       axesSpec: [
         {
-          name: 'pl7.app/sampleId',
-          type: 'String',
+          name: "pl7.app/sampleId",
+          type: "String",
         },
         {
-          name: 'pl7.app/cellId',
-          type: 'String',
+          name: "pl7.app/cellId",
+          type: "String",
         },
       ],
     },
   },
 ];
-
 </script>
 
 <template>
