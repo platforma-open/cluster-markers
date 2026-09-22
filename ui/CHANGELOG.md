@@ -1,5 +1,39 @@
 # @platforma-open/milaboratories.cluster-markers.ui
 
+## 1.6.0
+
+### Minor Changes
+
+- 3319e63: Adopt the block-tools structure, add the block kind, and move the model to
+  BlockModelV3.
+
+  The block gains an init-params contract — the cluster annotation, the
+  top-markers count, the two significance thresholds and the specificity mode —
+  so a project template can create it pre-configured, and `platforma` replaces
+  `model` as the model's export. Persisted settings carry over unchanged through
+  the legacy upgrader, and the args the workflow reads are the same keys as
+  before, so existing projects do not go stale.
+
+  Also a full SDK upgrade: model 1.49 to 1.83, workflow-tengo 5.7 to 6.11 and
+  tengo-builder 2.4 to 4.1.
+
+- d6bce9a: Add a per-cluster / all-clusters scope switch to the marker table.
+
+  The table's Export button writes the table you are looking at, and the cluster
+  axis was a sheet — so exporting gave one cluster's markers, without a cluster
+  column. The switch beside the cluster picker drops the sheet, putting every
+  cluster in the table at once with Cluster as an ordinary column, so Export
+  writes the whole result set.
+
+  Each scope keeps its own sorting, filters and column layout. The default is
+  per-cluster, which is what the block did before.
+
+### Patch Changes
+
+- Updated dependencies [3319e63]
+- Updated dependencies [d6bce9a]
+  - @platforma-open/milaboratories.cluster-markers.model@1.6.0
+
 ## 1.5.6
 
 ### Patch Changes
