@@ -55,6 +55,7 @@ const data = reactive<{
       </PlBtnGhost>
     </template>
     <PlAgDataTableV2
+      :key="app.model.data.tableScope"
       v-model="app.model.data.tableState"
       :settings="tableSettings"
       show-export-button
