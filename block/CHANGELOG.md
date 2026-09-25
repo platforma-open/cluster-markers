@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers
 
+## 1.4.1
+
+### Patch Changes
+
+- 85ff486: Update SDK: PlAgDataTable no longer recreates its grid in an endless loop
+
 ## 1.4.0
 
 ### Minor Changes
