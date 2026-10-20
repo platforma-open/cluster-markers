@@ -1,5 +1,11 @@
 # @platforma-open/milaboratories.cluster-markers.test
 
+## 1.1.4
+
+### Patch Changes
+
+- 774cd9b: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+
 ## 1.1.3
 
 ### Patch Changes

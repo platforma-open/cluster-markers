@@ -1,5 +1,13 @@
 # @platforma-open/milaboratories.cluster-markers.workflow
 
+## 1.9.3
+
+### Patch Changes
+
+- 774cd9b: Release every package through npm trusted publishing (OIDC) so each package's trusted publisher is used before it expires.
+- Updated dependencies [774cd9b]
+  - @platforma-open/milaboratories.cluster-markers.software@1.6.8
+
 ## 1.9.2
 
 ### Patch Changes
